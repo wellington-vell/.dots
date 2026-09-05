@@ -38,7 +38,7 @@
       programs.starship = {
         enable = true;
         settings = {
-          add_newline = true;
+          add_newline = false;
           command_timeout = 200;
           format = "[$directory$git_branch$git_status]($style)$character";
 
