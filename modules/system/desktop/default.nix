@@ -14,6 +14,7 @@
       terminal
       tmux
       lazydocker
+      files
       keyring
       cursor
       capture
