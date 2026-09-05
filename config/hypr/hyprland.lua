@@ -46,7 +46,7 @@ hl.workspace_rule({ workspace = "2", monitor = "DVI-D-2", default = true })
 
 -- Set programs that you use
 local terminal    = "ghostty"
-local fileManager = "dolphin"
+local fileManager = "nautilus"
 local menu        = "hyprlauncher"
 local browser     = "firefox"
 

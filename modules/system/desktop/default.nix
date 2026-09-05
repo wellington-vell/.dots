@@ -15,6 +15,7 @@
       tmux
       lazydocker
       files
+      vlc
       keyring
       cursor
       capture
