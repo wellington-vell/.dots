@@ -48,6 +48,7 @@ hl.workspace_rule({ workspace = "2", monitor = "DVI-D-2", default = true })
 local terminal    = "ghostty"
 local fileManager = "dolphin"
 local menu        = "hyprlauncher"
+local browser     = "firefox"
 
 
 -------------------
@@ -313,6 +314,7 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Omarchy-style tooling shortcuts
 hl.bind(mainMod .. " + ALT + Return", hl.dsp.exec_cmd(terminal .. " -e tmux"))
+hl.bind(mainMod .. " + SHIFT + B",    hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(terminal .. " -e lazydocker"))
 hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
