@@ -5,9 +5,7 @@
 }:
 {
   flake.modules.nixos.alpha = {
-    imports = [
-      ../../hosts/alpha/hardware-configuration.nix
-    ];
+    networking.hostName = "alpha";
   };
 
   flake.nixosConfigurations.alpha = inputs.nixpkgs.lib.nixosSystem {

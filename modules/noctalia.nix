@@ -3,7 +3,7 @@
   ...
 }:
 {
-  flake.modules.nixos.base =
+  flake.modules.nixos.noctalia =
     { pkgs, ... }:
     {
       imports = [ inputs.noctalia.nixosModules.default ];

@@ -5,9 +5,7 @@
 }:
 {
   flake.modules.nixos.beta = {
-    imports = [
-      ../../hosts/beta/hardware-configuration.nix
-    ];
+    networking.hostName = "beta";
   };
 
   flake.nixosConfigurations.beta = inputs.nixpkgs.lib.nixosSystem {
