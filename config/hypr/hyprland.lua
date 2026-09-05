@@ -265,10 +265,41 @@ hl.device({
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
--- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
-local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
+-- Omarchy-style: Super+Return opens terminal; Super+Q closes window;
+-- Super+C is universal copy (Ctrl+C / Ctrl+Insert in terminals).
+hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + W", hl.dsp.window.close())
+
+local function send_shortcut_once(mods, key)
+  return function()
+    hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "down" }))
+    hl.timer(function()
+      hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "up" }))
+    end, { timeout = 50, type = "oneshot" })
+  end
+end
+
+local function active_window_is_terminal()
+  local window = hl.get_active_window()
+  if not window then
+    return false
+  end
+  local class = (window.class or window.initial_class or ""):lower()
+  return class:find("ghostty", 1, true)
+    or class:find("kitty", 1, true)
+    or class:find("alacritty", 1, true)
+    or class:find("foot", 1, true)
+    or class:find("com.mitchellh.ghostty", 1, true)
+end
+
+hl.bind(mainMod .. " + C", function()
+  if active_window_is_terminal() then
+    send_shortcut_once("CTRL", "Insert")()
+  else
+    send_shortcut_once("CTRL", "C")()
+  end
+end)
+
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
