@@ -4,27 +4,36 @@
     {
       programs.bash = {
         completion.enable = true;
-        blesh.enable = true;
+        # Load ble ourselves with --attach=none so starship can hook before
+        # the line editor attaches; stock blesh.enable attaches too early and
+        # leaves a duplicated prompt line on every new shell.
+        blesh.enable = false;
 
-        # Useful interactive defaults + ble.sh fzf integration (NixOS-aware paths)
-        interactiveShellInit = lib.mkAfter ''
-          shopt -s histappend checkwinsize
-          HISTCONTROL=ignoreboth
-          HISTSIZE=32768
-          HISTFILESIZE=32768
+        interactiveShellInit = lib.mkMerge [
+          (lib.mkBefore ''
+            source ${pkgs.blesh}/share/blesh/ble.sh --attach=none
+          '')
+          (lib.mkAfter ''
+            shopt -s histappend checkwinsize
+            HISTCONTROL=ignoreboth
+            HISTSIZE=32768
+            HISTFILESIZE=32768
 
-          if [[ ''${BLE_VERSION-} ]]; then
-            _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
-            ble-import -d integration/fzf-completion
-            ble-import -d integration/fzf-key-bindings
-          fi
+            if [[ ''${BLE_VERSION-} ]]; then
+              _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
+              ble-import -d integration/fzf-completion
+              ble-import -d integration/fzf-key-bindings
+            fi
 
-          if command -v zoxide &>/dev/null; then
-            eval "$(zoxide init bash)"
-          fi
+            if command -v zoxide &>/dev/null; then
+              eval "$(zoxide init bash)"
+            fi
 
-          source ${../../../config/bash/aliases.sh}
-        '';
+            source ${../../../config/bash/aliases.sh}
+
+            [[ ''${BLE_VERSION-} ]] && ble-attach
+          '')
+        ];
       };
 
       environment.systemPackages = with pkgs; [
@@ -32,6 +41,7 @@
         eza
         bat
         zoxide
+        blesh
       ];
 
       # Omarchy-style Starship prompt
