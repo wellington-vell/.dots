@@ -2,6 +2,9 @@
   flake.modules.nixos.lazydocker =
     { pkgs, ... }:
     {
+      virtualisation.docker.enable = true;
+      users.users.well.extraGroups = [ "docker" ];
+
       environment.systemPackages = [
         pkgs.lazydocker
         (pkgs.makeDesktopItem {
