@@ -35,6 +35,10 @@ hl.monitor({
     scale    = "auto",
 })
 
+-- Default workspaces: primary LG first, regardless of connect order
+hl.workspace_rule({ workspace = "1", monitor = "HDMI-A-2", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "DVI-D-2", default = true })
+
 
 ---------------------
 ---- MY PROGRAMS ----
