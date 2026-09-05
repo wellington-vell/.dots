@@ -5,6 +5,7 @@
 }:
 {
   flake.modules.nixos.beta = {
+    imports = [ ./_hardware-configuration.nix ];
     networking.hostName = "beta";
   };
 

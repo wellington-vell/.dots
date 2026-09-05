@@ -5,6 +5,7 @@
 }:
 {
   flake.modules.nixos.alpha = {
+    imports = [ ./_hardware-configuration.nix ];
     networking.hostName = "alpha";
   };
 

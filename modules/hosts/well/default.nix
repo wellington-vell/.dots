@@ -5,6 +5,7 @@
 }:
 {
   flake.modules.nixos.well = {
+    imports = [ ./_hardware-configuration.nix ];
     networking.hostName = "well";
   };
 
