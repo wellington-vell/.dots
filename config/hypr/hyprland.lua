@@ -65,6 +65,8 @@ end)
 
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
 
+-- Match Omarchy: Yaru cursors at 24px
+hl.env("XCURSOR_THEME", "Yaru")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
@@ -273,6 +275,11 @@ hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+
+-- Omarchy-style tooling shortcuts
+hl.bind(mainMod .. " + ALT + Return", hl.dsp.exec_cmd(terminal .. " -e tmux"))
+hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(terminal .. " -e lazydocker"))
+hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))

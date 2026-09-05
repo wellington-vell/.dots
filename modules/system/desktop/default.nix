@@ -12,7 +12,10 @@
       gaming
       editors
       terminal
+      tmux
+      lazydocker
       keyring
+      cursor
     ];
   };
 }
