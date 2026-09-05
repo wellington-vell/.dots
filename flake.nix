@@ -2,6 +2,9 @@
   description = "NixOS dotfiles";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  # Cursor lags in the SCM commit box on 3.5.x; fix landed in 3.8+.
+  # Keep system on 26.05, pull a newer code-cursor from unstable.
+  inputs.nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
   inputs.import-tree.url = "github:denful/import-tree";
   inputs.noctalia.url = "github:noctalia-dev/noctalia/cachix";
