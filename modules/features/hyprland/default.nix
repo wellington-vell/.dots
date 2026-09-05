@@ -2,7 +2,7 @@
   flake.modules.nixos.hyprland =
     { pkgs, lib, ... }:
     let
-      hyprlandConfig = ../config/hypr/hyprland.lua;
+      hyprlandConfig = ../../../config/hypr/hyprland.lua;
 
       wrapHyprland = pkg:
         let

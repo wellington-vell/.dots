@@ -32,14 +32,16 @@ modules/                               every *.nix here is a flake-parts module
 │   ├── boot/, nix/, locale/, users/, packages/, state/, git/
 │   ├── desktop/default.nix            attr: imports hyprland, noctalia, apps, …
 │   └── drivers/nvidia.nix             host-opt-in GPU stack
-├── hyprland.nix, noctalia.nix, …      named desktop features (not auto-on base)
+├── features/                          named desktop/app features (not auto-on base)
+│   ├── hyprland/default.nix
+│   ├── noctalia/, firefox/, discord/, gaming/, …
+│   └── editors/, terminal/, keyring/
 └── hosts/
     └── well.nix                       composition + nixosConfigurations.well
 ```
 
 `modules/system/` holds machine/OS plumbing (PipeWire, NetworkManager, boot, drivers).
-Desktop app features stay as top-level `modules/<feature>.nix` files until a `features/`
-tree is introduced.
+`modules/features/` holds opt-in desktop/app features composed by `system/desktop`.
 
 ### Entry points (exceptions to the pattern)
 
@@ -69,7 +71,7 @@ apps contribute to **named** deferred modules (`hyprland`, `gaming`, …).
 ```
 
 ```nix
-# modules/firefox.nix — named feature; included only via desktop (or a host list)
+# modules/features/firefox/default.nix — named feature; included only via desktop
 {
   flake.modules.nixos.firefox = {
     programs.firefox.enable = true;
@@ -111,8 +113,8 @@ via `base`; do not commit per-host `hardware-configuration.nix` files.
 
 ### Hyprland config
 
-`config/hypr/hyprland.lua` stays in the repo. `modules/hyprland.nix` wraps the Hyprland
-package with `--config` pointing at that store path. Do not copy configs into
+`config/hypr/hyprland.lua` stays in the repo. `modules/features/hyprland/default.nix` wraps
+the Hyprland package with `--config` pointing at that store path. Do not copy configs into
 `~/.config/hypr` via activation scripts.
 
 ### Audio
@@ -148,7 +150,8 @@ list. Rebuild with `sudo nixos-rebuild switch --impure --flake .#well`.
 
 ### Add a new desktop feature
 
-1. Create `modules/<feature>.nix` defining `flake.modules.nixos.<feature> = { ... };`.
+1. Create `modules/features/<feature>/default.nix` defining
+   `flake.modules.nixos.<feature> = { ... };`.
 2. Add `<feature>` to the `imports` list in `modules/system/desktop/default.nix`
    (or to a specific host).
 
