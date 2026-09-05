@@ -4,7 +4,8 @@
     let
       hyprlandConfig = ../../../config/hypr/hyprland.lua;
 
-      wrapHyprland = pkg:
+      wrapHyprland =
+        pkg:
         let
           wrapped = pkgs.symlinkJoin {
             name = "hyprland-with-config";
