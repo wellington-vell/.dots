@@ -18,10 +18,21 @@
             ble-import -d integration/fzf-completion
             ble-import -d integration/fzf-key-bindings
           fi
+
+          if command -v zoxide &>/dev/null; then
+            eval "$(zoxide init bash)"
+          fi
+
+          source ${../../../config/bash/aliases.sh}
         '';
       };
 
-      environment.systemPackages = [ pkgs.fzf ];
+      environment.systemPackages = with pkgs; [
+        fzf
+        eza
+        bat
+        zoxide
+      ];
 
       # Omarchy-style Starship prompt
       programs.starship = {
