@@ -16,6 +16,7 @@
       lazydocker
       keyring
       cursor
+      capture
     ];
   };
 }

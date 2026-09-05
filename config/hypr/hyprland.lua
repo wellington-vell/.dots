@@ -312,6 +312,22 @@ hl.bind(mainMod .. " + ALT + Return", hl.dsp.exec_cmd(terminal .. " -e tmux"))
 hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(terminal .. " -e lazydocker"))
 hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
+-- Screen capture (Omarchy-style Print binds)
+-- Print: region screenshot → clipboard (annotate with satty)
+-- Shift+Print: fullscreen screenshot → clipboard
+-- Alt+Print: toggle region screen recording
+-- Super+Print: color picker
+hl.bind("Print", hl.dsp.exec_cmd(
+  [[mkdir -p "$HOME/Pictures/Screenshots" && grim -g "$(slurp)" - | satty --filename - --fullscreen --copy-command 'wl-copy' --output-filename "$HOME/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H%M%S').png"]]
+))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(
+  [[mkdir -p "$HOME/Pictures/Screenshots" && grim - | tee "$HOME/Pictures/Screenshots/screen-$(date '+%Y%m%d-%H%M%S').png" | wl-copy -t image/png]]
+))
+hl.bind("ALT + Print", hl.dsp.exec_cmd(
+  [[mkdir -p "$HOME/Videos" && pkill -SIGINT wf-recorder || wf-recorder -g "$(slurp)" -f "$HOME/Videos/recording-$(date '+%Y%m%d-%H%M%S').mp4"]]
+))
+hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"))
+
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
