@@ -18,7 +18,7 @@
       vlc
       keyring
       fonts
-      cursor
+      pointer
       portal
     ];
   };

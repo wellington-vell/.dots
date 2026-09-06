@@ -6,6 +6,7 @@ environment.systemPackages = with pkgs; [
         wget
         git
         opencode
+        pi-coding-agent
         # Build toolchains
         nodejs
         bun

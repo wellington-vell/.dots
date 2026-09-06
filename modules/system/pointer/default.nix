@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.cursor =
+  flake.modules.nixos.pointer =
     { pkgs, ... }:
     {
       # Omarchy ships yaru-icon-theme; match with Yaru cursors at size 24
