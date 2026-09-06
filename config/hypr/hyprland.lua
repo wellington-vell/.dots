@@ -117,7 +117,7 @@ hl.config({
         -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
         allow_tearing = false,
 
-        layout = "dwindle",
+        layout = "scrolling",
     },
 
     decoration = {
@@ -328,6 +328,12 @@ hl.bind(mainMod .. " + L", function() -- Toggle dwindle/scrolling layout
   hl.config({ general = { layout = target } })
 end)
 
+-- Scrolling layout controls, https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/
+hl.bind(mainMod .. " + period",          hl.dsp.layout("move +col"))       -- scroll right one column
+hl.bind(mainMod .. " + semicolon",       hl.dsp.layout("swapcol r"))       -- swap column right
+hl.bind(mainMod .. " + SHIFT + period",  hl.dsp.layout("colresize +conf")) -- cycle column width forward
+hl.bind(mainMod .. " + SHIFT + comma",   hl.dsp.layout("colresize -conf")) -- cycle column width backward
+
 -- Omarchy-style tooling shortcuts
 hl.bind(mainMod .. " + ALT + Return", hl.dsp.exec_cmd(terminal .. " -e tmux"))
 hl.bind(mainMod .. " + SHIFT + B",    hl.dsp.exec_cmd(browser))
@@ -370,7 +376,15 @@ hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 local noctaliaIpc = "noctalia msg "
 hl.bind(mainMod .. " + Space",  hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle launcher"))
 hl.bind(mainMod .. " + CTRL + O", hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle control-center"))
-hl.bind(mainMod .. " + comma", hl.dsp.exec_cmd(noctaliaIpc .. "settings-toggle"))
+-- Super+comma: noctalia settings, or swapcol when in scrolling layout
+hl.bind(mainMod .. " + comma", function()
+  local current = hl.get_config("general.layout") or "dwindle"
+  if current == "scrolling" then
+    hl.dispatch(hl.dsp.layout("swapcol l"))
+  else
+    hl.dispatch(hl.dsp.exec_cmd(noctaliaIpc .. "settings-toggle"))
+  end
+end)
 hl.bind("ALT + Tab",           hl.dsp.exec_cmd(noctaliaIpc .. "window-switcher"))
 
 hl.window_rule({
