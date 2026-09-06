@@ -29,11 +29,6 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd("noctalia")
 end)
 
--- Environment --
-hl.env("XCURSOR_THEME", "Yaru")
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
-
 -- Look and Feel --
 hl.config({
     general = {
@@ -174,7 +169,9 @@ local function active_window_is_terminal()
     or class:find("com.mitchellh.ghostty", 1, true)
 end
 
--- Super+C/V: universal copy/paste (Ctrl+C / Shift+Insert, Ctrl+Insert in terminals)
+-- Super+C/V: universal copy/paste.
+-- Ghostty maps Shift+Insert to primary selection (not clipboard), so GitHub's
+-- copy button (clipboard-only) would paste nothing. Use Ctrl+Shift+V instead.
 hl.bind(mainMod .. " + C", function()
   if active_window_is_terminal() then
     send_shortcut_once("CTRL", "Insert")()
@@ -183,7 +180,13 @@ hl.bind(mainMod .. " + C", function()
   end
 end)
 
-hl.bind(mainMod .. " + V", send_shortcut_once("SHIFT", "Insert"))
+hl.bind(mainMod .. " + V", function()
+  if active_window_is_terminal() then
+    send_shortcut_once("CTRL + SHIFT", "V")()
+  else
+    send_shortcut_once("CTRL", "V")()
+  end
+end)
 
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))

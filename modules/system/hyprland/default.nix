@@ -37,6 +37,10 @@
         package = wrapHyprland pkgs.hyprland;
       };
 
-      environment.systemPackages = [ pkgs.hyprpicker ];
+      environment.systemPackages = [
+        pkgs.hyprpicker
+        pkgs.wl-clipboard
+        pkgs.wtype
+      ];
     };
 }

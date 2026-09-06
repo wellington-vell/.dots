@@ -19,6 +19,10 @@
         resize-overlay = never
         cursor-style = block
         cursor-style-blink = false
+
+        # Default is paste_from_selection (primary). Browser copy buttons only
+        # fill the clipboard, so Shift+Insert would paste empty.
+        keybind = shift+insert=paste_from_clipboard
       '';
       normalHomes = lib.pipe config.users.users [
         lib.attrValues
