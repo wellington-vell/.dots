@@ -4,36 +4,26 @@
     {
       programs.bash = {
         completion.enable = true;
-        # Load ble ourselves with --attach=none so starship can hook before
-        # the line editor attaches; stock blesh.enable attaches too early and
-        # leaves a duplicated prompt line on every new shell.
-        blesh.enable = false;
+        blesh.enable = true;
 
-        interactiveShellInit = lib.mkMerge [
-          (lib.mkBefore ''
-            source ${pkgs.blesh}/share/blesh/ble.sh --attach=none
-          '')
-          (lib.mkAfter ''
-            shopt -s histappend checkwinsize
-            HISTCONTROL=ignoreboth
-            HISTSIZE=32768
-            HISTFILESIZE=32768
+        interactiveShellInit = lib.mkAfter ''
+          shopt -s histappend checkwinsize
+          HISTCONTROL=ignoreboth
+          HISTSIZE=32768
+          HISTFILESIZE=32768
 
-            if [[ ''${BLE_VERSION-} ]]; then
-              _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
-              ble-import -d integration/fzf-completion
-              ble-import -d integration/fzf-key-bindings
-            fi
+          if [[ ''${BLE_VERSION-} ]]; then
+            _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
+            ble-import -d integration/fzf-completion
+            ble-import -d integration/fzf-key-bindings
+          fi
 
-            if command -v zoxide &>/dev/null; then
-              eval "$(zoxide init bash)"
-            fi
+          if command -v zoxide &>/dev/null; then
+            eval "$(zoxide init bash)"
+          fi
 
-            source ${../../../config/bash/aliases.sh}
-
-            [[ ''${BLE_VERSION-} ]] && ble-attach
-          '')
-        ];
+          source ${../../../config/bash/aliases.sh}
+        '';
       };
 
       environment.systemPackages = with pkgs; [
@@ -41,14 +31,13 @@
         eza
         bat
         zoxide
-        blesh
       ];
 
       # Omarchy-style Starship prompt
       programs.starship = {
         enable = true;
         settings = {
-          add_newline = false;
+          add_newline = true;
           command_timeout = 200;
           format = "[$directory$git_branch$git_status]($style)$character";
 

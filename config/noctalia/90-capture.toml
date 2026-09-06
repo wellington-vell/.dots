@@ -28,7 +28,6 @@ end = [
   "bluetooth",
   "volume",
   "brightness",
-  "battery",
   "control-center",
   "session",
 ]
