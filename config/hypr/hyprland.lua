@@ -90,7 +90,6 @@ hl.env("HYPRCURSOR_SIZE", "24")
 --   },
 -- })
 
--- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
 -- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
 -- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
@@ -332,16 +331,16 @@ hl.bind(mainMod .. " + SHIFT + B",    hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(terminal .. " -e lazydocker"))
 hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
--- Screen capture (Omarchy-style Print binds)
--- Print: region screenshot → clipboard (annotate with satty)
--- Shift+Print: fullscreen screenshot → clipboard
+-- Screen capture via Noctalia built-ins (output policy in 90-capture.toml)
+-- Print: region screenshot → saved to ~/Pictures/Screenshots + clipboard
+-- Shift+Print: fullscreen screenshot → saved + clipboard
 -- Alt+Print: toggle Noctalia screen recorder (bar icon while recording)
 -- Super+Print: color picker
 hl.bind("Print", hl.dsp.exec_cmd(
-  [[mkdir -p "$HOME/Pictures/Screenshots" && grim -g "$(slurp)" - | satty --filename - --fullscreen --copy-command 'wl-copy' --output-filename "$HOME/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H%M%S').png"]]
+  [[noctalia msg screenshot-region]]
 ))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd(
-  [[mkdir -p "$HOME/Pictures/Screenshots" && grim - | tee "$HOME/Pictures/Screenshots/screen-$(date '+%Y%m%d-%H%M%S').png" | wl-copy -t image/png]]
+  [[noctalia msg screenshot-fullscreen]]
 ))
 hl.bind("ALT + Print", hl.dsp.exec_cmd(
   [[noctalia msg plugin noctalia/screen_recorder:service all toggle]]

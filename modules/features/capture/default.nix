@@ -17,12 +17,7 @@
       };
 
       environment.systemPackages = with pkgs; [
-        grim
-        slurp
-        wl-clipboard
         hyprpicker
-        wf-recorder
-        satty
         # Required by Noctalia's screen_recorder bar plugin
         gpu-screen-recorder
       ];

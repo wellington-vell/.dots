@@ -1,6 +1,7 @@
-# Capture indicators on the Noctalia bar:
+# Capture indicators and behavior on the Noctalia bar:
 # - privacy: mic / camera / screen-share activity
 # - recorder: noctalia/screen_recorder widget (red while recording)
+# - screenshot: built-in wlr-screencopy capture; policy under [shell.screenshot]
 
 [plugins]
 enabled = ["noctalia/screen_recorder"]
@@ -13,6 +14,15 @@ directory = "~/Videos/Recordings"
 show_cursor = true
 glyph_recording = "video-filled"
 
+[shell.screenshot]
+save_to_file = true
+directory = "~/Pictures/Screenshots"
+copy_to_clipboard = true
+freeze_screen = true
+
+[widget.screenshot]
+glyph = "screenshot"
+
 [widget.recorder]
 type = "noctalia/screen_recorder:recorder"
 
@@ -21,6 +31,7 @@ end = [
   "media",
   "privacy",
   "recorder",
+  "screenshot",
   "tray",
   "notifications",
   "clipboard",
