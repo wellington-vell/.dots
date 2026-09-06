@@ -8,11 +8,16 @@ enabled = ["noctalia/screen_recorder"]
 auto_update = "official"
 
 [plugin_settings."noctalia/screen_recorder"]
-hide_inactive = true
+hide_inactive = false
 video_source = "portal"
 directory = "~/Videos/Recordings"
 show_cursor = true
+# Always-visible bar indicator: gray/video when idle, primary while starting,
+# red while recording, repeat while the replay buffer is armed.
+glyph_idle = "video"
+glyph_pending = "video"
 glyph_recording = "video-filled"
+glyph_replaying = "repeat"
 
 [shell.screenshot]
 save_to_file = true

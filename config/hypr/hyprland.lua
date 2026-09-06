@@ -333,17 +333,17 @@ hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
 -- Screen capture via Noctalia built-ins (output policy in 90-capture.toml)
 -- Print: region screenshot → saved to ~/Pictures/Screenshots + clipboard
--- Shift+Print: fullscreen screenshot → saved + clipboard
--- Alt+Print: toggle Noctalia screen recorder (bar icon while recording)
+-- Shift+Print: fullscreen screenshot → saved + clipboard (toast on save)
+-- Alt+Print: toggle Noctalia screen recorder (red icon + toast)
 -- Super+Print: color picker
 hl.bind("Print", hl.dsp.exec_cmd(
   [[noctalia msg screenshot-region]]
 ))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd(
-  [[noctalia msg screenshot-fullscreen]]
+  [[noctalia msg screenshot-fullscreen && noctalia msg notification-show "Screenshot saved" "~/Pictures/Screenshots"]]
 ))
 hl.bind("ALT + Print", hl.dsp.exec_cmd(
-  [[noctalia msg plugin noctalia/screen_recorder:service all toggle]]
+  [[noctalia-record-toggle]]
 ))
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"))
 
