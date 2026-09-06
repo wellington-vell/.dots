@@ -9,6 +9,9 @@
       # Nautilus resolves its sidebar/toolbar symbolic icons (starred,
       # user-trash, ...) from the icon theme. GTK defaults to "Adwaita",
       # which isn't in the system path otherwise, so icons render missing.
-      environment.systemPackages = [ pkgs.nautilus pkgs.adwaita-icon-theme ];
+      environment.systemPackages = [
+        pkgs.nautilus
+        pkgs.adwaita-icon-theme
+      ];
     };
 }

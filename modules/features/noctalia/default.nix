@@ -4,7 +4,12 @@
 }:
 {
   flake.modules.nixos.noctalia =
-    { pkgs, config, lib, ... }:
+    {
+      pkgs,
+      config,
+      lib,
+      ...
+    }:
     let
       noctaliaConfig = ../../../config/noctalia/config.toml;
       normalHomes = lib.pipe config.users.users [

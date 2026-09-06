@@ -1,6 +1,11 @@
 {
   flake.modules.nixos.terminal =
-    { pkgs, config, lib, ... }:
+    {
+      pkgs,
+      config,
+      lib,
+      ...
+    }:
     let
       ghosttyConfig = ../../../config/ghostty/config.ghostty;
       normalHomes = lib.pipe config.users.users [
