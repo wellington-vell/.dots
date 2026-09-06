@@ -1,0 +1,11 @@
+# ble.sh + starship already own the prompt. Ghostty's bash inject emits
+# OSC 133 "fresh line" on every prompt, which shows up as a blank/duplicate
+# line on open (Cursor/VSCode terminals don't use this inject).
+shell-integration = none
+
+confirm-close-surface = false
+window-padding-x = 14
+window-padding-y = 14
+resize-overlay = never
+cursor-style = block
+cursor-style-blink = false

@@ -1,0 +1,34 @@
+# Capture indicators on the Noctalia bar:
+# - privacy: mic / camera / screen-share activity
+# - recorder: noctalia/screen_recorder widget (red while recording)
+
+[plugins]
+enabled = ["noctalia/screen_recorder"]
+auto_update = "official"
+
+[plugin_settings."noctalia/screen_recorder"]
+hide_inactive = true
+video_source = "portal"
+directory = "~/Videos/Recordings"
+show_cursor = true
+glyph_recording = "video-filled"
+
+[widget.recorder]
+type = "noctalia/screen_recorder:recorder"
+
+[bar.default]
+end = [
+  "media",
+  "privacy",
+  "recorder",
+  "tray",
+  "notifications",
+  "clipboard",
+  "network",
+  "bluetooth",
+  "volume",
+  "brightness",
+  "battery",
+  "control-center",
+  "session",
+]
