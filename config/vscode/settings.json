@@ -1,0 +1,9 @@
+{
+    "workbench.editor.empty.hint": "hidden",
+    "workbench.sideBar.location": "right",
+    "workbench.activityBar.location": "top",
+    "workbench.iconTheme": "material-icon-theme",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "terminal.integrated.shellIntegration.enabled": false,
+    "settingsSync.enable": false
+}
