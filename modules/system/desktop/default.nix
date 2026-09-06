@@ -17,6 +17,7 @@
       files
       vlc
       keyring
+      fonts
       cursor
       capture
     ];
