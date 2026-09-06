@@ -307,10 +307,24 @@ end)
 
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))   -- Omarchy: toggle floating/tiling
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+
+-- Omarchy-style window management
+hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen({ mode = "fullscreen" }))                                  -- Full screen
+hl.bind(mainMod .. " + CTRL + F",  hl.dsp.window.fullscreen_state({ internal = 0, client = 2 }))                        -- Tiled full screen
+hl.bind(mainMod .. " + ALT + F",   hl.dsp.window.fullscreen({ mode = "maximized" }))                                    -- Full width
+hl.bind(mainMod .. " + O", function() -- Pop window out (float & pin)
+  hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
+  hl.dispatch(hl.dsp.window.pin({ action = "toggle" }))
+end)
+hl.bind(mainMod .. " + L", function() -- Toggle dwindle/scrolling layout
+  local current = hl.get_config("general.layout") or "dwindle"
+  local target  = current == "dwindle" and "scrolling" or "dwindle"
+  hl.config({ general = { layout = target } })
+end)
 
 -- Omarchy-style tooling shortcuts
 hl.bind(mainMod .. " + ALT + Return", hl.dsp.exec_cmd(terminal .. " -e tmux"))
@@ -349,8 +363,8 @@ for i = 1, 10 do
 end
 
 -- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + S",       hl.dsp.workspace.toggle_special("scratchpad"))
+hl.bind(mainMod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -381,8 +395,8 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 
 -- See https://docs.noctalia.dev/noctalia/compositor-settings/hyprland/
 local noctaliaIpc = "noctalia msg "
-hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle launcher"))
-hl.bind(mainMod .. " + O",     hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle control-center"))
+hl.bind(mainMod .. " + Space",  hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle launcher"))
+hl.bind(mainMod .. " + CTRL + O", hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle control-center"))
 hl.bind(mainMod .. " + comma", hl.dsp.exec_cmd(noctaliaIpc .. "settings-toggle"))
 hl.bind("ALT + Tab",           hl.dsp.exec_cmd(noctaliaIpc .. "window-switcher"))
 
