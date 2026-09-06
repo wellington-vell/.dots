@@ -70,7 +70,7 @@ end)
 
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
 
--- Match Omarchy: Yaru cursors at 24px
+-- Yaru cursors at 24px
 hl.env("XCURSOR_THEME", "Yaru")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
@@ -269,7 +269,7 @@ hl.device({
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
--- Omarchy-style: Super+Return opens terminal; Super+Q closes window;
+-- Super+Return opens terminal; Super+W closes window;
 -- Super+C is universal copy (Ctrl+C / Ctrl+Insert in terminals);
 -- Super+V is universal paste (Shift+Insert).
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
@@ -309,12 +309,12 @@ hl.bind(mainMod .. " + V", send_shortcut_once("SHIFT", "Insert"))
 
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))   -- Omarchy: toggle floating/tiling
+hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))   -- toggle floating/tiling
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
--- Omarchy-style window management
+-- Window management
 hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen({ mode = "fullscreen" }))                                  -- Full screen
 hl.bind(mainMod .. " + CTRL + F",  hl.dsp.window.fullscreen_state({ internal = 0, client = 2 }))                        -- Tiled full screen
 hl.bind(mainMod .. " + ALT + F",   hl.dsp.window.fullscreen({ mode = "maximized" }))                                    -- Full width
@@ -334,13 +334,13 @@ hl.bind(mainMod .. " + semicolon",       hl.dsp.layout("swapcol r"))       -- sw
 hl.bind(mainMod .. " + SHIFT + period",  hl.dsp.layout("colresize +conf")) -- cycle column width forward
 hl.bind(mainMod .. " + SHIFT + comma",   hl.dsp.layout("colresize -conf")) -- cycle column width backward
 
--- Omarchy-style tooling shortcuts
+-- Tooling shortcuts
 hl.bind(mainMod .. " + ALT + Return", hl.dsp.exec_cmd(terminal .. " -e tmux"))
 hl.bind(mainMod .. " + SHIFT + B",    hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(terminal .. " -e lazydocker"))
 hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
--- Omarchy-style clipboard: Super+Ctrl+V opens clipboard history (Noctalia panel)
+-- Super+Ctrl+V opens clipboard history (Noctalia panel)
 hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
 
 -- Super+Print: color picker

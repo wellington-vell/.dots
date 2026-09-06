@@ -4,10 +4,6 @@
     {
       programs.steam.enable = true;
 
-      environment.systemPackages = with pkgs; [
-        lutris
-        syncplay
-        qbittorrent
-      ];
+      environment.systemPackages = [ pkgs.lutris ];
     };
 }

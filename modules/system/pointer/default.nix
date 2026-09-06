@@ -2,7 +2,6 @@
   flake.modules.nixos.pointer =
     { pkgs, ... }:
     {
-      # Omarchy ships yaru-icon-theme; match with Yaru cursors at size 24
       environment.systemPackages = [ pkgs.yaru-theme ];
 
       environment.sessionVariables = {

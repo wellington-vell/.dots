@@ -12,9 +12,5 @@
           "gtk"
         ];
       };
-
-      environment.systemPackages = with pkgs; [
-        hyprpicker
-      ];
     };
 }

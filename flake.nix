@@ -7,6 +7,10 @@
   inputs.nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
   inputs.import-tree.url = "github:denful/import-tree";
+  inputs.zen-browser = {
+    url = "github:0xc000022070/zen-browser-flake";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
   inputs.noctalia.url = "github:noctalia-dev/noctalia/cachix";
   inputs.identity = {
     url = "path:/home/well/.secrets";

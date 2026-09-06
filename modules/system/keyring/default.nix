@@ -11,7 +11,7 @@
         lock-after=false
       '';
 
-      # Omarchy-style unlocked default keyring — avoids login unlock prompts
+      # Unlocked default keyring — avoids login unlock prompts
       ensureDefaultKeyring = pkgs.writeShellScript "ensure-default-keyring" ''
         set -euo pipefail
         KEYRING_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/keyrings"

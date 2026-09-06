@@ -6,6 +6,37 @@
         completion.enable = true;
         blesh.enable = true;
 
+        shellAliases = {
+          # File system (eza / bat / fzf always packaged below)
+          ls = "eza -lh --group-directories-first --icons=auto";
+          lsa = "ls -a";
+          lt = "eza --tree --level=2 --long --icons --git";
+          lta = "lt -a";
+          ff = "fzf --preview 'bat --style=numbers --color=always {}'";
+          eff = ''$EDITOR "$(ff)"'';
+
+          # Directories
+          ".." = "cd ..";
+          "..." = "cd ../..";
+          "...." = "cd ../../..";
+
+          # Tools
+          c = "opencode";
+          d = "docker";
+          g = "git";
+          t = "tmux attach || tmux new -s Work";
+          grep = "rg";
+          lg = "lazygit";
+
+          # Git
+          gcm = "git commit -m";
+          gcam = "git commit -a -m";
+          gcad = "git commit -a --amend";
+
+          # zoxide-backed cd (zd defined in interactiveShellInit)
+          cd = "zd";
+        };
+
         interactiveShellInit = lib.mkAfter ''
           shopt -s histappend checkwinsize
           HISTCONTROL=ignoreboth
@@ -18,11 +49,34 @@
             ble-import -d integration/fzf-key-bindings
           fi
 
-          if command -v zoxide &>/dev/null; then
-            eval "$(zoxide init bash)"
-          fi
+          eval "$(zoxide init bash)"
 
-          source ${../../../config/bash/aliases.sh}
+          n() {
+            if [ "$#" -eq 0 ]; then
+              command nvim .
+            else
+              command nvim "$@"
+            fi
+          }
+
+          open() (
+            xdg-open "$@" >/dev/null 2>&1 &
+          )
+
+          zd() {
+            if (( $# == 0 )); then
+              builtin cd ~ || return
+            elif [[ -d $1 ]]; then
+              builtin cd "$1" || return
+            else
+              if ! z "$@"; then
+                echo "Error: Directory not found"
+                return 1
+              fi
+              printf '\U000F17A9 '
+              pwd
+            fi
+          }
         '';
       };
 
@@ -31,9 +85,11 @@
         eza
         bat
         zoxide
+        ripgrep
+        fd
+        lazygit
       ];
 
-      # Omarchy-style Starship prompt
       programs.starship = {
         enable = true;
         settings = {

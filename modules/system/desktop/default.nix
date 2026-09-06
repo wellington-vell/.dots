@@ -5,21 +5,31 @@
 {
   flake.modules.nixos.desktop = {
     imports = with config.flake.modules.nixos; [
+      # Desktop / CLI stack (modules/system/)
       hyprland
       noctalia
-      firefox
-      discord
-      gaming
-      editors
-      terminal
-      tmux
-      lazydocker
-      files
-      vlc
+      portal
       keyring
       fonts
       pointer
-      portal
+      files
+      terminal
+      tmux
+      # Apps / tools (modules/features/)
+      chromium
+      zen
+      obsidian
+      discord
+      gaming
+      syncplay
+      qbittorrent
+      neovim
+      vscode
+      cursor
+      lazydocker
+      vlc
+      toolchains
+      agents
     ];
   };
 }
