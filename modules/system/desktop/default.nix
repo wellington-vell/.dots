@@ -19,7 +19,7 @@
       keyring
       fonts
       cursor
-      capture
+      portal
     ];
   };
 }

@@ -270,7 +270,8 @@ hl.device({
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Omarchy-style: Super+Return opens terminal; Super+Q closes window;
--- Super+C is universal copy (Ctrl+C / Ctrl+Insert in terminals).
+-- Super+C is universal copy (Ctrl+C / Ctrl+Insert in terminals);
+-- Super+V is universal paste (Shift+Insert).
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + W", hl.dsp.window.close())
 
@@ -304,6 +305,8 @@ hl.bind(mainMod .. " + C", function()
   end
 end)
 
+hl.bind(mainMod .. " + V", send_shortcut_once("SHIFT", "Insert"))
+
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))   -- Omarchy: toggle floating/tiling
@@ -331,20 +334,10 @@ hl.bind(mainMod .. " + SHIFT + B",    hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(terminal .. " -e lazydocker"))
 hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd(terminal .. " -e nvim"))
 
--- Screen capture via Noctalia built-ins (output policy in 90-capture.toml)
--- Print: region screenshot → saved to ~/Pictures/Screenshots + clipboard
--- Shift+Print: fullscreen screenshot → saved + clipboard (toast on save)
--- Alt+Print: toggle Noctalia screen recorder (red icon + toast)
+-- Omarchy-style clipboard: Super+Ctrl+V opens clipboard history (Noctalia panel)
+hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
+
 -- Super+Print: color picker
-hl.bind("Print", hl.dsp.exec_cmd(
-  [[noctalia msg screenshot-region]]
-))
-hl.bind("SHIFT + Print", hl.dsp.exec_cmd(
-  [[noctalia msg screenshot-fullscreen && noctalia msg notification-show "Screenshot saved" "~/Pictures/Screenshots"]]
-))
-hl.bind("ALT + Print", hl.dsp.exec_cmd(
-  [[noctalia-record-toggle]]
-))
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"))
 
 -- Move focus with mainMod + arrow keys
@@ -361,10 +354,6 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
--- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S",       hl.dsp.workspace.toggle_special("scratchpad"))
-hl.bind(mainMod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
-
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
@@ -372,21 +361,6 @@ hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 -- Move/resize windows with mainMod + LMB/RMB and dragging
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
-
--- Laptop multimedia keys for volume and LCD brightness
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
-
--- Requires playerctl
-hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
-hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
-
 
 -----------------------------
 ---- NOCTALIA (IPC binds) ----
