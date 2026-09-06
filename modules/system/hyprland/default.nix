@@ -38,16 +38,5 @@
       };
 
       environment.systemPackages = [ pkgs.hyprpicker ];
-
-      services.xserver.enable = true;
-      # xterm is pulled in by xserver by default; Ghostty is the terminal we use.
-      services.xserver.excludePackages = [ pkgs.xterm ];
-      services.displayManager = {
-        sddm = {
-          enable = true;
-          wayland.enable = false;
-        };
-        defaultSession = "hyprland";
-      };
     };
 }

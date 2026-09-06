@@ -7,6 +7,7 @@
     imports = with config.flake.modules.nixos; [
       # Desktop / CLI stack (modules/system/)
       hyprland
+      sddm
       noctalia
       portal
       keyring

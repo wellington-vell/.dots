@@ -22,7 +22,7 @@ hl.workspace_rule({ workspace = "2", monitor = "DVI-D-2", default = true })
 local terminal    = "ghostty"
 local fileManager = "nautilus"
 local menu        = "hyprlauncher"
-local browser     = "firefox"
+local browser     = "zen-beta"
 
 -- Autostart --
 hl.on("hyprland.start", function ()
