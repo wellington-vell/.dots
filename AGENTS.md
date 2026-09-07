@@ -22,7 +22,7 @@ an opt-out when needed).
 ```
 flake.nix                 flake-parts + import-tree entry
 flake.lock
-config/                   non-Nix app configs (hypr, nvim, noctalia, …)
+assets/                   wallpapers, icons, and other static media
 modules/                  every *.nix is a flake-parts module
 ├── flake-parts.nix
 ├── formatter.nix
@@ -126,14 +126,15 @@ strings — no home-manager. Examples:
 - Ghostty → `pkgs.writeText` in `modules/system/terminal/`, then activation
   symlink into `~/.config/ghostty/` (Ghostty does not read `/etc`).
 
-Keep files under `config/` only when the app needs a non-Nix format or a writable
-tree: Hyprland Lua, LazyVim, Noctalia (and assets).
+Keep files under `config/` only when the app needs a non-Nix format that is
+impractical to embed (prefer in-module `pkgs.writeText` strings first). Static
+media belongs under `assets/`.
 
 ### Hyprland config
 
-`config/hypr/hyprland.lua` stays in the repo. `modules/system/hyprland/default.nix` wraps
-the Hyprland package with `--config` pointing at that store path. Do not copy configs into
-`~/.config/hypr` via activation scripts.
+`modules/system/hyprland/default.nix` embeds `hyprland.lua` via `pkgs.writeText`
+and wraps the Hyprland package with `--config` pointing at that store path. Do
+not copy configs into `~/.config/hypr` via activation scripts.
 
 ### Audio
 

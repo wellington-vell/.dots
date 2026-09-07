@@ -28,7 +28,7 @@
           # connector — on this rig that's DVI-D-2 (secondary Samsung), so the
           # greeter only appears on the secondary monitor.
           wayland.enable = false;
-          # Mirrors config/hypr/hyprland.lua:4-16:
+          # Mirrors hyprland monitor layout:
           #   HDMI-A-2 (LG 1920x1080) primary at 0x0
           #   DVI-D-2  (Samsung 1366x768) at 1920x0
           setupScript = ''

@@ -1,8 +1,0 @@
-{
-    "window.autoDetectColorScheme": true,
-    "cursor.composer.usageSummaryDisplay": "always",
-    "workbench.iconTheme": "material-icon-theme",
-    "cursor.composer.shouldChimeAfterChatFinishes": true,
-    "terminal.integrated.shellIntegration.enabled": false,
-    "settingsSync.enable": false
-}

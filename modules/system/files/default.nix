@@ -2,7 +2,7 @@
   flake.modules.nixos.files =
     { pkgs, ... }:
     {
-      # Matches config/hypr/hyprland.lua fileManager = "nautilus" (Super+E).
+      # Matches hyprland fileManager = "nautilus" (Super+E).
       # gvfs covers trash, USB, and network mounts.
       services.gvfs.enable = true;
 

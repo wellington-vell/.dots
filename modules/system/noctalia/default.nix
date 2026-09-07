@@ -42,6 +42,8 @@
         '';
       };
 
+      wallpapers = ../../../assets/wallpapers;
+
       settings = {
         bar.default = {
           start = [
@@ -64,6 +66,11 @@
             "battery"
             "session"
           ];
+        };
+
+        wallpaper = {
+          directory = "${wallpapers}";
+          default.path = "${wallpapers}/nix-wallpaper-moonscape.png";
         };
 
         widget.media.hide_when_no_media = true;

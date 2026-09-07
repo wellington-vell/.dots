@@ -18,8 +18,31 @@
         config.allowUnfree = true;
       };
 
-      cursorSettings = ../../../config/cursor/settings.json;
-      cursorKeybindings = ../../../config/cursor/keybindings.json;
+      cursorSettings = pkgs.writeText "cursor-settings.json" (
+        builtins.toJSON {
+          "window.autoDetectColorScheme" = true;
+          "cursor.composer.usageSummaryDisplay" = "always";
+          "workbench.iconTheme" = "material-icon-theme";
+          "cursor.composer.shouldChimeAfterChatFinishes" = true;
+          "terminal.integrated.shellIntegration.enabled" = false;
+          "settingsSync.enable" = false;
+        }
+      );
+
+      cursorKeybindings = pkgs.writeText "cursor-keybindings.json" (
+        builtins.toJSON [
+          {
+            key = "ctrl+e";
+            command = "-cursor.toggleAgentWindowIDEUnification";
+            when = "!isGlass && workbenchState != 'empty'";
+          }
+          {
+            key = "ctrl+j";
+            command = "-workbench.action.togglePanel";
+            when = "!isAuxiliaryWindowFocusedContext";
+          }
+        ]
+      );
 
       cursorPackage = unstable.vscode-with-extensions.override {
         vscode = unstable.code-cursor;

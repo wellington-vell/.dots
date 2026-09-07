@@ -7,8 +7,19 @@
       ...
     }:
     let
-      vscodeSettings = ../../../config/vscode/settings.json;
-      vscodeKeybindings = ../../../config/vscode/keybindings.json;
+      vscodeSettings = pkgs.writeText "vscode-settings.json" (
+        builtins.toJSON {
+          "workbench.editor.empty.hint" = "hidden";
+          "workbench.sideBar.location" = "right";
+          "workbench.activityBar.location" = "top";
+          "workbench.iconTheme" = "material-icon-theme";
+          "diffEditor.ignoreTrimWhitespace" = false;
+          "terminal.integrated.shellIntegration.enabled" = false;
+          "settingsSync.enable" = false;
+        }
+      );
+
+      vscodeKeybindings = pkgs.writeText "vscode-keybindings.json" (builtins.toJSON [ ]);
 
       vscodePackage = pkgs.vscode-with-extensions.override {
         vscodeExtensions = with pkgs.vscode-extensions; [
