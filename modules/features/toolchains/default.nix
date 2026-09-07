@@ -23,7 +23,9 @@
         in
         {
           inherit version;
-          src = newSources.${pkgs.stdenv.hostPlatform.system} or (throw "Unsupported system: ${pkgs.stdenv.hostPlatform.system}");
+          src =
+            newSources.${pkgs.stdenv.hostPlatform.system}
+              or (throw "Unsupported system: ${pkgs.stdenv.hostPlatform.system}");
           passthru = old.passthru // {
             sources = newSources;
           };

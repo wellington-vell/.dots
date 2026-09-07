@@ -1,9 +1,0 @@
-[bar.default]
-start = [ "control-center", "launcher", "wallpaper", "workspaces" ]
-end = [ "media", "tray", "notifications", "clipboard", "network", "bluetooth", "volume", "brightness", "battery", "session" ]
-
-[widget.media]
-hide_when_no_media = true
-
-[widget.network]
-show_label = false

@@ -252,6 +252,9 @@ hl.bind(mainMod .. " + comma", function()
   end
 end)
 hl.bind("ALT + Tab",           hl.dsp.exec_cmd(noctaliaIpc .. "window-switcher"))
+hl.bind("Print",               hl.dsp.exec_cmd(noctaliaIpc .. "screenshot-region"))
+hl.bind("SHIFT + Print",       hl.dsp.exec_cmd(noctaliaIpc .. "screenshot-fullscreen"))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd(noctaliaIpc .. "plugin noctalia/screen_recorder:service all toggle focused"))
 
 hl.window_rule({
     name  = "noctalia-settings",

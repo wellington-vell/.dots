@@ -6,7 +6,12 @@
       users.users.well = {
         isNormalUser = true;
         initialHashedPassword = "";
-        extraGroups = [ "wheel" ];
+        # video/render: DRM device access for gpu-screen-recorder monitor enum.
+        extraGroups = [
+          "wheel"
+          "video"
+          "render"
+        ];
         packages = with pkgs; [ tree ];
       };
     };

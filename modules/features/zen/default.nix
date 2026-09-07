@@ -1,7 +1,8 @@
 {
   inputs,
   ...
-}: {
+}:
+{
   flake.modules.nixos.zen =
     { pkgs, ... }:
     {

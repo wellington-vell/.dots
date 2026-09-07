@@ -4,5 +4,10 @@
         "key": "ctrl+e",
         "command": "-cursor.toggleAgentWindowIDEUnification",
         "when": "!isGlass && workbenchState != 'empty'"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "-workbench.action.togglePanel",
+        "when": "!isAuxiliaryWindowFocusedContext"
     }
 ]

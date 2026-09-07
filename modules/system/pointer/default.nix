@@ -1,6 +1,11 @@
 {
   flake.modules.nixos.pointer =
-    { pkgs, lib, config, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     let
       cursorPackage = pkgs.bibata-cursors;
       theme = "Bibata-Modern-Classic";
