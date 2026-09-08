@@ -8,7 +8,6 @@
       # Desktop / CLI stack (modules/system/)
       hyprland
       sddm
-      noctalia
       portal
       keyring
       fonts

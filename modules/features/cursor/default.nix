@@ -12,23 +12,28 @@
     }:
     let
       # 26.05 ships Cursor 3.5.x with laggy SCM commit input; unstable is past the 3.8 fix.
-      # Import (not legacyPackages) so allowUnfree applies to this nixpkgs instance.
+      # Import (not legacyPackages) so allowUnfreePredicate applies to this nixpkgs instance.
       unstable = import inputs.nixpkgs-unstable {
         inherit (pkgs.stdenv.hostPlatform) system;
-        config.allowUnfree = true;
+        config.allowUnfreePredicate =
+          pkg:
+          builtins.elem (lib.getName pkg) [
+            "cursor"
+            "vscode"
+          ];
       };
 
       cursorSettings = pkgs.writeText "cursor-settings.json" (
         builtins.toJSON {
           "cursor.composer.usageSummaryDisplay" = "always";
           "cursor.composer.shouldChimeAfterChatFinishes" = true;
-          
+
           "window.autoDetectColorScheme" = true;
-          
+
           "workbench.iconTheme" = "material-icon-theme";
-          
+
           "terminal.integrated.shellIntegration.enabled" = false;
-          
+
           "settingsSync.enable" = false;
 
           "editor.lineNumbers" = "interval";

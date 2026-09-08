@@ -13,19 +13,19 @@
           "workbench.sideBar.location" = "right";
           "workbench.activityBar.location" = "top";
           "workbench.iconTheme" = "material-icon-theme";
-          
+
           "diffEditor.ignoreTrimWhitespace" = false;
-          
+
           "terminal.integrated.shellIntegration.enabled" = false;
-          
+
           "settingsSync.enable" = false;
-          
+
           "editor.lineNumbers" = "interval";
           "editor.minimap.enabled" = false;
           "editor.cursorBlinking" = "solid";
           "editor.cursorSmoothCaretAnimation" = "on";
           "editor.cursorStyle" = "line-thin";
-          
+
           "gitlens.telemetry.enabled" = false;
           "gitlens.views.scm.grouped.views" = {
             "commits" = true;

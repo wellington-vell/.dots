@@ -14,6 +14,7 @@
       base
       desktop
       nvidia
+      noctalia
       alpha
     ];
   };
