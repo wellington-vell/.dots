@@ -20,12 +20,36 @@
 
       cursorSettings = pkgs.writeText "cursor-settings.json" (
         builtins.toJSON {
-          "window.autoDetectColorScheme" = true;
           "cursor.composer.usageSummaryDisplay" = "always";
-          "workbench.iconTheme" = "material-icon-theme";
           "cursor.composer.shouldChimeAfterChatFinishes" = true;
+          
+          "window.autoDetectColorScheme" = true;
+          
+          "workbench.iconTheme" = "material-icon-theme";
+          
           "terminal.integrated.shellIntegration.enabled" = false;
+          
           "settingsSync.enable" = false;
+
+          "editor.lineNumbers" = "interval";
+          "editor.cursorBlinking" = "solid";
+          "editor.cursorSmoothCaretAnimation" = "on";
+          "editor.cursorStyle" = "line-thin";
+
+          "gitlens.telemetry.enabled" = false;
+          "gitlens.views.scm.grouped.views" = {
+            "commits" = true;
+            "branches" = false;
+            "remotes" = false;
+            "stashes" = false;
+            "tags" = true;
+            "worktrees" = true;
+            "contributors" = true;
+            "fileHistory" = false;
+            "repositories" = true;
+            "searchAndCompare" = false;
+            "launchpad" = true;
+          };
         }
       );
 
@@ -47,9 +71,10 @@
       cursorPackage = unstable.vscode-with-extensions.override {
         vscode = unstable.code-cursor;
         vscodeExtensions = with unstable.vscode-extensions; [
-          bbenoist.nix
           pkief.material-icon-theme
           eamodio.gitlens
+          formulahendry.auto-rename-tag
+          meganrogge.template-string-converter
         ];
       };
 

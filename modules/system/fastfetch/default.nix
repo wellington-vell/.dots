@@ -26,10 +26,10 @@
             }
           },
           "display": {
-            "separator": ": ",
+            "separator": " ",
             "brightColor": true,
             "key": {
-              "width": 14
+              "width": 24
             }
           },
           "modules": [

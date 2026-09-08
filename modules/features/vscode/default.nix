@@ -13,9 +13,33 @@
           "workbench.sideBar.location" = "right";
           "workbench.activityBar.location" = "top";
           "workbench.iconTheme" = "material-icon-theme";
+          
           "diffEditor.ignoreTrimWhitespace" = false;
+          
           "terminal.integrated.shellIntegration.enabled" = false;
+          
           "settingsSync.enable" = false;
+          
+          "editor.lineNumbers" = "interval";
+          "editor.minimap.enabled" = false;
+          "editor.cursorBlinking" = "solid";
+          "editor.cursorSmoothCaretAnimation" = "on";
+          "editor.cursorStyle" = "line-thin";
+          
+          "gitlens.telemetry.enabled" = false;
+          "gitlens.views.scm.grouped.views" = {
+            "commits" = true;
+            "branches" = false;
+            "remotes" = false;
+            "stashes" = false;
+            "tags" = true;
+            "worktrees" = true;
+            "contributors" = true;
+            "fileHistory" = false;
+            "repositories" = true;
+            "searchAndCompare" = false;
+            "launchpad" = true;
+          };
         }
       );
 
@@ -23,9 +47,10 @@
 
       vscodePackage = pkgs.vscode-with-extensions.override {
         vscodeExtensions = with pkgs.vscode-extensions; [
-          bbenoist.nix
           pkief.material-icon-theme
           eamodio.gitlens
+          formulahendry.auto-rename-tag
+          meganrogge.template-string-converter
         ];
       };
 
