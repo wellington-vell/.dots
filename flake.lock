@@ -42,8 +42,8 @@
     "identity": {
       "flake": false,
       "locked": {
-        "lastModified": 1788703564,
-        "narHash": "sha256-sW6IF18xKh0vErBGhjgdTCWPfDNO2mTk9C+3SlkzWfc=",
+        "lastModified": 1788927604,
+        "narHash": "sha256-dsC3t+6Fqixd5ItLqY4cay5TinChXb0JAAqcc9507QI=",
         "path": "/home/well/.secrets",
         "type": "path"
       },

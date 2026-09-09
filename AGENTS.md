@@ -20,24 +20,27 @@ an opt-out when needed).
 ## Layout
 
 ```
-flake.nix                 flake-parts + import-tree entry
+flake.nix                  flake entry
 flake.lock
-assets/                   wallpapers, icons, and other static media
-modules/                  every *.nix is a flake-parts module
+assets/                    static media
+modules/                   every *.nix is a flake-parts module
 ├── flake-parts.nix
 ├── formatter.nix
-├── system/               machine commons + desktop/CLI stack
-│   ├── base.nix          → nixos.base (minimal pkgs)
-│   ├── nix.nix, host.nix, … → nixos.base
-│   ├── core/             organizational; merge target is per-file (base or named)
-│   ├── home/             user shell/desktop features (path only; merge targets vary)
-│   │   ├── cli/ (bash, starship, eza, fzf, …) → nixos.base
-│   │   ├── terminal/ghostty.nix → nixos.terminal
-│   │   ├── tmux/, hyprland/, noctalia/ → named modules
-│   ├── desktop.nix       imports named system + feature modules
-│   └── drivers/          host-opt-in (nvidia, …)
-├── features/             named apps/tools (composed by desktop)
-└── hosts/<name>/         default.nix + variables.nix + _hardware-configuration.nix
+├── system/                machine commons + desktop stack
+│   ├── base.nix
+│   ├── host.nix
+│   ├── unfree.nix
+│   ├── core/              per-file base or named
+│   ├── drivers/           host-opt-in
+│   ├── home/              shell + desktop
+│   │   ├── cli/
+│   │   ├── hyprland/
+│   │   ├── noctalia/
+│   │   ├── terminal/
+│   │   └── tmux/
+│   └── desktop.nix        composes features
+├── features/              named apps/tools
+└── hosts/<name>/          per-host config
 ```
 
 Three layers:

@@ -3,11 +3,6 @@
     { pkgs, lib, ... }:
     {
       programs.bash = {
-        shellAliases = {
-          # zoxide-backed cd (zd defined in interactiveShellInit)
-          cd = "zd";
-        };
-
         interactiveShellInit = lib.mkAfter ''
           eval "$(zoxide init bash)"
 
