@@ -2,8 +2,6 @@
   flake.modules.nixos.nvidia = {
     boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
-    hardware.cpu.amd.updateMicrocode = true;
-
     services.xserver.videoDrivers = [ "nvidia" ];
     hardware.nvidia = {
       modesetting.enable = true;

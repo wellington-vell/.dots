@@ -27,23 +27,28 @@ modules/                  every *.nix is a flake-parts module
 ├── flake-parts.nix
 ├── formatter.nix
 ├── system/               machine commons + desktop/CLI stack
-│   ├── <base>/           → nixos.base (audio, boot, bash, …)
-│   ├── <named>/          → composed by desktop (hyprland, portal, …)
-│   ├── desktop/          imports named system + feature modules
+│   ├── base.nix          → nixos.base (minimal pkgs)
+│   ├── nix.nix, host.nix, … → nixos.base
+│   ├── core/             organizational; merge target is per-file (base or named)
+│   ├── home/             user shell/desktop features (path only; merge targets vary)
+│   │   ├── cli/ (bash, starship, eza, fzf, …) → nixos.base
+│   │   ├── terminal/ghostty.nix → nixos.terminal
+│   │   ├── tmux/, hyprland/, noctalia/ → named modules
+│   ├── desktop.nix       imports named system + feature modules
 │   └── drivers/          host-opt-in (nvidia, …)
 ├── features/             named apps/tools (composed by desktop)
-└── hosts/<name>/         host module + _hardware-configuration.nix
+└── hosts/<name>/         default.nix + variables.nix + _hardware-configuration.nix
 ```
 
 Three layers:
 
 | Layer | Path | Deferred module | Meaning |
 |-------|------|-----------------|---------|
-| Machine commons | `modules/system/<x>/` → `flake.modules.nixos.base` | Always on for hosts that include `base` |
-| Desktop / CLI stack | `modules/system/<x>/` → **named** module | Opt-in via `desktop`; OS/session or shell plumbing |
+| Machine commons | `modules/system/<x>/` (incl. much of `core/` and `home/` shell tools) → `flake.modules.nixos.base` | Always on for hosts that include `base` |
+| Desktop / CLI stack | `modules/system/` (incl. `home/hyprland`, `home/terminal`, …) → **named** module | Opt-in via `desktop`; OS/session or shell plumbing |
 | Apps / tools | `modules/features/<x>/` → **named** module | User-facing programs composed by `desktop` |
 
-Named modules under `system/` do **not** become `base` — path is for humans; composition is via `desktop`.
+Named modules under `system/` do **not** become `base` — path is for humans; composition is via `desktop`. Files under `core/` / `home/` may target `base` or named modules.
 
 ### Entry points (exceptions to the pattern)
 
@@ -56,11 +61,11 @@ Named modules under `system/` do **not** become `base` — path is for humans; c
 
 System commons under `modules/system/` contribute to `flake.modules.nixos.base`. Desktop
 stack and apps contribute to **named** deferred modules (`hyprland`, `gaming`, …).
-`modules/system/desktop/default.nix` composes those names; hosts opt in by listing `base`,
+`modules/system/desktop.nix` composes those names; hosts opt in by listing `base`,
 `desktop`, `nvidia`, etc. in `nixosSystem`.
 
 ```nix
-# modules/system/boot/default.nix — merges into shared base
+# modules/system/core/boot.nix — merges into shared base
 {
   flake.modules.nixos.base =
     { pkgs, ... }:
@@ -72,7 +77,7 @@ stack and apps contribute to **named** deferred modules (`hyprland`, `gaming`, �
 ```
 
 ```nix
-# modules/features/discord/default.nix — named feature; included only via desktop
+# modules/features/discord.nix — named feature; included only via desktop
 {
   flake.modules.nixos.discord =
     { pkgs, ... }:
@@ -102,6 +107,16 @@ and exposes a flake output.
   flake.modules.nixos.alpha = {
     imports = [ ./_hardware-configuration.nix ];
     networking.hostName = "alpha";
+    # Host-specific layout (see Host-specific settings)
+    host.monitors = [
+      {
+        output = "HDMI-A-2";
+        mode = "1920x1080";
+        position = "0x0";
+        primary = true;
+        defaultWorkspace = 1;
+      }
+    ];
   };
 
   flake.nixosConfigurations.alpha = inputs.nixpkgs.lib.nixosSystem {
@@ -109,36 +124,64 @@ and exposes a flake output.
       base
       desktop
       nvidia
+      noctalia
       alpha
     ];
   };
 }
 ```
 
+### Host-specific settings
+
+Set per-machine values on the **host** deferred module via `options.host.*`
+(defined in `modules/system/host.nix` on `base`). Shared modules read
+`config.host` — never pass host values through `specialArgs`.
+
+- `host.monitors` — list of outputs (mode, position, primary, defaultWorkspace).
+  Consumed by Hyprland Lua and SDDM `xrandr` setup. Empty = auto layout / no SDDM override.
+- `host.locale` / `host.timeZone` — i18n and timezone (defaults: `en_US.UTF-8`, `America/Sao_Paulo`).
+- `host.apps` — default `terminal`, `fileManager`, `browser`, `menu` for Hyprland binds.
+- `host.hyprland.fragments` — named Lua pieces assembled in fixed order into the wrapped config
+  (`monitors`, `look`, `input`, `binds`, `rules`).
+- `host.hyprland.extraLua` — shells (e.g. noctalia) append Lua after the fragments.
+
 ### App / shell config (Nix-native first)
 
 Prefer declaring config inside the feature module with NixOS options or in-module
 strings — no home-manager. Examples:
 
-- Bash aliases → `programs.bash.shellAliases` in `modules/system/bash/` (shell
-  functions stay in `interactiveShellInit`).
-- Tmux → `programs.tmux` options + `extraConfig` in `modules/system/tmux/`.
-- Ghostty → `pkgs.writeText` in `modules/system/terminal/`, then activation
+- Bash aliases → `programs.bash.shellAliases` in `modules/system/home/cli/bash.nix`
+  (and per-tool files like `home/cli/eza.nix`); shell functions stay in `interactiveShellInit`.
+- Starship → `programs.starship` in `modules/system/home/cli/starship.nix`.
+- Tmux → `programs.tmux` options + `extraConfig` under `modules/system/home/tmux/`.
+- Ghostty → `pkgs.writeText` in `modules/system/home/terminal/ghostty.nix`, then activation
   symlink into `~/.config/ghostty/` (Ghostty does not read `/etc`).
 
 Keep files under `config/` only when the app needs a non-Nix format that is
 impractical to embed (prefer in-module `pkgs.writeText` strings first). Static
 media belongs under `assets/`.
 
+**Never** reach `assets/` with relative `../` from a module file — nesting depth
+changes on every reorg and resolves to the wrong path (e.g. `modules/assets/...`).
+Always close over flake-parts `self` and use `"${self}/assets/..."` inside the
+deferred NixOS module.
+
+### Binary caches (Cachix)
+
+`modules/system/core/cachix.nix` sets `nix.settings` substituters (hyprland,
+nix-community, noctalia). The same keys live in `flake.nix` `nixConfig` so flake
+evaluation can hit them too. Accept flake config on first rebuild if prompted.
+
 ### Hyprland config
 
-`modules/system/hyprland/default.nix` embeds `hyprland.lua` via `pkgs.writeText`
-and wraps the Hyprland package with `--config` pointing at that store path. Do
-not copy configs into `~/.config/hypr` via activation scripts.
+`modules/system/home/hyprland/` assembles `hyprland.lua` from `host.hyprland.fragments`
+(plus `extraLua`) via `pkgs.writeText` and wraps the Hyprland package with `--config`
+pointing at that store path. Do not copy configs into `~/.config/hypr` via activation
+scripts. Monitor layout and default apps come from `config.host`.
 
 ### Audio
 
-`modules/system/audio/default.nix` enables PipeWire / WirePlumber on `base`. Do not add
+`modules/system/core/audio.nix` enables PipeWire / WirePlumber on `base`. Do not add
 session-start shell scripts for default sinks; use WirePlumber drop-ins if device selection
 is needed.
 
@@ -155,33 +198,35 @@ is needed.
   `nixos/nix-configuration.nix`). Paths are free-form; only the feature they express matters.
 - **Put host-specific stacks in named modules** (`nvidia` under `system/drivers/`), not in
   `base`.
-- **Desktop plumbing lives under `system/`** (hyprland, portals, keyring, fonts, …) even when
-  the deferred module is named and composed by `desktop`. Apps stay under `features/`.
+- **Desktop plumbing lives under `system/`** (incl. `home/hyprland`, portals, keyring, fonts, …)
+  even when the deferred module is named and composed by `desktop`. Apps stay under `features/`.
+- **Asset paths use `self`, never `../`.** Reference media as `"${self}/assets/..."` from the
+  flake-parts module so moves under `modules/` cannot break paths.
 
 ## Common tasks
 
 ### Add a system package (base)
 
-Edit `modules/system/packages/default.nix`, appending to the `environment.systemPackages`
-list. Rebuild with `sudo nixos-rebuild switch --flake .#alpha`.
+Edit `modules/system/base.nix` (or the feature module that owns the package), appending to
+`environment.systemPackages`. Rebuild with `sudo nixos-rebuild switch --flake .#alpha`.
 
 ### Add a new shared system feature
 
-1. Create `modules/system/<feature>/default.nix` defining
+1. Create `modules/system/<feature>.nix` (or under `core/` / `home/`) defining
    `flake.modules.nixos.base = { ... };`.
    import-tree picks it up automatically (applies to every host that includes `base`).
 
 ### Add a new desktop-stack module (named, under system/)
 
-1. Create `modules/system/<feature>/default.nix` defining
+1. Create `modules/system/<feature>.nix` (or under `home/`) defining
    `flake.modules.nixos.<feature> = { ... };`.
-2. Add `<feature>` to the `imports` list in `modules/system/desktop/default.nix`.
+2. Add `<feature>` to the `imports` list in `modules/system/desktop.nix`.
 
 ### Add a new desktop app feature
 
-1. Create `modules/features/<feature>/default.nix` defining
+1. Create `modules/features/<feature>.nix` defining
    `flake.modules.nixos.<feature> = { ... };`.
-2. Add `<feature>` to the `imports` list in `modules/system/desktop/default.nix`
+2. Add `<feature>` to the `imports` list in `modules/system/desktop.nix`
    (or to a specific host).
 
 ### Add a new host
@@ -189,7 +234,8 @@ list. Rebuild with `sudo nixos-rebuild switch --flake .#alpha`.
 1. Create `modules/hosts/<name>/default.nix` modeled on `alpha` or `beta`.
 2. On the machine: `sudo nixos-generate-config --show-hardware-config > modules/hosts/<name>/_hardware-configuration.nix`
 3. Import that file from the host module (`imports = [ ./_hardware-configuration.nix ];`).
-4. Compose `base` plus whatever named modules that host needs (`desktop`, `nvidia`, …).
+4. Set `host.monitors` (and any other `host.*`) for that machine.
+5. Compose `base` plus whatever named modules that host needs (`desktop`, `nvidia`, `noctalia`, …).
 
 ### Disable a feature temporarily
 
