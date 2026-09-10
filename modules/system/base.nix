@@ -7,6 +7,8 @@
       environment.systemPackages = with pkgs; [
         wget
         git
+        nil
+        nixfmt
       ];
     };
 }

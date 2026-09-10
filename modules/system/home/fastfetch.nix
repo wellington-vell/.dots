@@ -32,7 +32,6 @@
             "host",
             "kernel",
             "uptime",
-            "packages",
             "shell",
             "display",
             "de",
@@ -45,13 +44,14 @@
             "terminal",
             "terminalfont",
             "cpu",
-            "gpu",
             "memory",
-            "swap",
-            "disk",
-            "battery",
             "locale",
             "break",
+            "packages",
+            "gpu",
+            "disk",
+            "battery",
+            "swap",
             "colors"
           ]
         }
@@ -85,7 +85,6 @@
             "host",
             "kernel",
             "uptime",
-            "packages",
             "shell",
             "display",
             "de",
@@ -98,13 +97,14 @@
             "terminal",
             "terminalfont",
             "cpu",
-            "gpu",
             "memory",
-            "swap",
-            "disk",
-            "battery",
             "locale",
             "break",
+            "packages",
+            "gpu",
+            "disk",
+            "battery",
+            "swap",
             "colors"
           ]
         }

@@ -1,16 +1,7 @@
 {
   flake.modules.nixos.base =
+    { lib, ... }:
     {
-      lib,
-      pkgs,
-      ...
-    }:
-    {
-      environment.systemPackages = with pkgs; [
-        nil
-        nixfmt
-      ];
-
       nixpkgs.config.allowUnfreePredicate =
         pkg:
         let
