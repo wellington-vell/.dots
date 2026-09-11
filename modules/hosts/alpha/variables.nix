@@ -1,5 +1,7 @@
 {
   flake.modules.nixos.alpha = {
+    host.dotsPath = "/home/well/.dots";
+
     # LG 1920x1080 primary, Samsung 1366x768 to the right
     host.monitors = [
       {

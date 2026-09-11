@@ -23,67 +23,6 @@
           ];
       };
 
-      cursorSettings = pkgs.writeText "cursor-settings.json" (
-        builtins.toJSON {
-          "cursor.composer.usageSummaryDisplay" = "always";
-          "cursor.composer.shouldChimeAfterChatFinishes" = true;
-          "cursor.cpp.disabledLanguages" = [ "plaintext" ];
-
-          "window.autoDetectColorScheme" = true;
-
-          "workbench.iconTheme" = "material-icon-theme";
-
-          "terminal.integrated.shellIntegration.enabled" = false;
-
-          "settingsSync.enable" = false;
-
-          "editor.lineNumbers" = "interval";
-          "editor.cursorBlinking" = "solid";
-          "editor.cursorSmoothCaretAnimation" = "on";
-          "editor.cursorStyle" = "line-thin";
-
-          "gitlens.telemetry.enabled" = false;
-          "gitlens.views.scm.grouped.views" = {
-            "commits" = true;
-            "branches" = false;
-            "remotes" = false;
-            "stashes" = false;
-            "tags" = true;
-            "worktrees" = true;
-            "contributors" = true;
-            "fileHistory" = false;
-            "repositories" = true;
-            "searchAndCompare" = false;
-            "launchpad" = true;
-          };
-
-          "nix.enableLanguageServer" = true;
-          "nix.serverPath" = "nil";
-          "nix.serverSettings" = {
-            "nil" = {
-              formatting.command = [ "nixfmt" ];
-              nix.flake.autoArchive = true;
-              nix.flake.autoEvalInputs = true;
-            };
-          };
-        }
-      );
-
-      cursorKeybindings = pkgs.writeText "cursor-keybindings.json" (
-        builtins.toJSON [
-          {
-            key = "ctrl+e";
-            command = "-cursor.toggleAgentWindowIDEUnification";
-            when = "!isGlass && workbenchState != 'empty'";
-          }
-          {
-            key = "ctrl+j";
-            command = "-workbench.action.togglePanel";
-            when = "!isAuxiliaryWindowFocusedContext";
-          }
-        ]
-      );
-
       cursorPackage = unstable.vscode-with-extensions.override {
         vscode = unstable.code-cursor;
         vscodeExtensions = with unstable.vscode-extensions; [
@@ -102,6 +41,8 @@
         (lib.filter (u: u.isNormalUser))
         (map (u: u.home))
       ];
+
+      dots = config.host.dotsPath;
     in
     {
       environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -110,8 +51,8 @@
       system.activationScripts.cursorConfig = lib.stringAfter [ "users" ] ''
         for home in ${lib.escapeShellArgs normalHomes}; do
           mkdir -p "$home/.config/Cursor/User"
-          ln -sfn ${cursorSettings} "$home/.config/Cursor/User/settings.json"
-          ln -sfn ${cursorKeybindings} "$home/.config/Cursor/User/keybindings.json"
+          ln -sfn ${lib.escapeShellArg "${dots}/config/cursor/settings.json"} "$home/.config/Cursor/User/settings.json"
+          ln -sfn ${lib.escapeShellArg "${dots}/config/cursor/keybindings.json"} "$home/.config/Cursor/User/keybindings.json"
         done
       '';
     };

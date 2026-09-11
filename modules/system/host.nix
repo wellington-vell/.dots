@@ -47,6 +47,11 @@
           description = "Per-host monitor layout for Hyprland and SDDM. Empty = auto.";
         };
 
+        dotsPath = lib.mkOption {
+          type = lib.types.str;
+          description = "Absolute path to this flake checkout (mutable config symlinks).";
+        };
+
         locale = lib.mkOption {
           type = lib.types.str;
           default = "en_US.UTF-8";
