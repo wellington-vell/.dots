@@ -69,7 +69,8 @@
             version = false, -- always use the latest git commit
             -- version = "*", -- try installing the latest stable version for plugins that support semver
           },
-          install = { colorscheme = { "tokyonight", "habamax" } },
+          -- Matugen/base16 applied via plugins/base16.lua; habamax is install fallback.
+          install = { colorscheme = { "habamax" } },
           checker = {
             enabled = true, -- check for plugin updates periodically
             notify = false, -- notify on update
@@ -123,11 +124,58 @@
         }
       '';
 
-      nvimLua = pkgs.runCommand "nvim-lua" { } ''
-        mkdir -p $out/config $out/plugins
-        ln -s ${lazyLua} $out/config/lazy.lua
-        ln -s ${lspLua} $out/plugins/lsp.lua
-        ln -s ${noiceLua} $out/plugins/noice.lua
+      # Noctalia community neovim template writes matugen.lua + expects this plugin.
+      base16Lua = pkgs.writeText "nvim-base16.lua" ''
+        return {
+          {
+            "RRethy/base16-nvim",
+            lazy = false,
+            priority = 1000,
+            config = function()
+              local ok, matugen = pcall(require, "matugen")
+              if ok then
+                matugen.setup()
+              end
+            end,
+          },
+          {
+            "LazyVim/LazyVim",
+            opts = {
+              colorscheme = function()
+                local ok, matugen = pcall(require, "matugen")
+                if ok then
+                  matugen.setup()
+                end
+              end,
+            },
+          },
+        }
+      '';
+
+      # Placeholder until Noctalia's neovim template overwrites with Matugen colors.
+      matugenSeed = pkgs.writeText "nvim-matugen-seed.lua" ''
+        local M = {}
+
+        function M.setup()
+          -- Seeded until Noctalia writes the real Matugen palette.
+        end
+
+        if _G.__matugen_signal then
+          _G.__matugen_signal:stop()
+          _G.__matugen_signal:close()
+        end
+
+        local signal = vim.uv.new_signal()
+        _G.__matugen_signal = signal
+        signal:start(
+          "sigusr1",
+          vim.schedule_wrap(function()
+            package.loaded["matugen"] = nil
+            require("matugen").setup()
+          end)
+        )
+
+        return M
       '';
 
       lazyvimDesktop = pkgs.makeDesktopItem {
@@ -180,8 +228,22 @@
           mkdir -p "$home/.config/nvim"
           ln -sfn ${initLua} "$home/.config/nvim/init.lua"
           ln -sfn ${styluaToml} "$home/.config/nvim/stylua.toml"
-          rm -rf "$home/.config/nvim/lua"
-          ln -sfn ${nvimLua} "$home/.config/nvim/lua"
+
+          # Real lua/ tree (not a store symlink) so Noctalia can write matugen.lua.
+          lua_dir="$home/.config/nvim/lua"
+          if [ -L "$lua_dir" ]; then
+            rm -f "$lua_dir"
+          fi
+          mkdir -p "$lua_dir/config" "$lua_dir/plugins"
+          ln -sfn ${lazyLua} "$lua_dir/config/lazy.lua"
+          ln -sfn ${lspLua} "$lua_dir/plugins/lsp.lua"
+          ln -sfn ${noiceLua} "$lua_dir/plugins/noice.lua"
+          ln -sfn ${base16Lua} "$lua_dir/plugins/base16.lua"
+          if [ ! -e "$lua_dir/matugen.lua" ]; then
+            cp ${matugenSeed} "$lua_dir/matugen.lua"
+            chmod u+w "$lua_dir/matugen.lua"
+          fi
+          chown -R --reference="$home" "$home/.config/nvim" 2>/dev/null || true
         done
       '';
 

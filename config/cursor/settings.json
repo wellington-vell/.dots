@@ -3,8 +3,8 @@
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.cpp.disabledLanguages": ["plaintext"],
 
-  "window.autoDetectColorScheme": true,
-
+  "workbench.colorTheme": "NoctaliaTheme",
+  "workbench.preferredDarkColorTheme": "NoctaliaTheme",
   "workbench.iconTheme": "material-icon-theme",
 
   "terminal.integrated.shellIntegration.enabled": false,

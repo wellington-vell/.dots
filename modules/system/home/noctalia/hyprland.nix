@@ -3,6 +3,25 @@
     # Hyprland integration (kept out of the shared compositor module).
     host.hyprland.extraLua = ''
       -- Noctalia --
+      -- Store --config cannot be patched by Noctalia's apply.sh; load the
+      -- rendered theme file directly (seeded empty until first resolve).
+      do
+        local path = os.getenv("HOME") .. "/.config/hypr/noctalia.lua"
+        local ok, mod = pcall(dofile, path)
+        if ok and type(mod) == "table" and type(mod.apply_theme) == "function" then
+          mod.apply_theme()
+        else
+          hl.config({
+            general = {
+              col = {
+                active_border = "rgba(7aa2f7ee)",
+                inactive_border = "rgba(1a1b26aa)",
+              },
+            },
+          })
+        end
+      end
+
       hl.on("hyprland.start", function ()
         hl.exec_cmd("noctalia")
       end)

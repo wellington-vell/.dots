@@ -2,6 +2,8 @@
   "workbench.editor.empty.hint": "hidden",
   "workbench.sideBar.location": "right",
   "workbench.activityBar.location": "top",
+  "workbench.colorTheme": "NoctaliaTheme",
+  "workbench.preferredDarkColorTheme": "NoctaliaTheme",
   "workbench.iconTheme": "material-icon-theme",
 
   "diffEditor.ignoreTrimWhitespace": false,

@@ -19,8 +19,8 @@
       }
     ];
 
-    # host.locale = "en_US.UTF-8";
-    # host.timeZone = "America/Sao_Paulo";
-    # host.apps.browser = "zen-beta";
+    host.locale = "en_US.UTF-8";
+    host.timeZone = "America/Sao_Paulo";
+    host.apps.browser = "zen-beta";
   };
 }

@@ -20,6 +20,10 @@
         cursor-style = block
         cursor-style-blink = false
 
+        # Noctalia renders ~/.config/ghostty/themes/noctalia; keep this in Nix so
+        # the template apply.sh does not try to sed the store symlink.
+        theme = noctalia
+
         # Default is paste_from_selection (primary). Browser copy buttons only
         # fill the clipboard, so Shift+Insert would paste empty.
         keybind = shift+insert=paste_from_clipboard
@@ -45,6 +49,7 @@
         for home in ${lib.escapeShellArgs normalHomes}; do
           mkdir -p "$home/.config/ghostty"
           ln -sfn ${ghosttyConfig} "$home/.config/ghostty/config.ghostty"
+          chown -R --reference="$home" "$home/.config/ghostty" 2>/dev/null || true
         done
       '';
     };
