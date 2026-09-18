@@ -63,52 +63,24 @@
           pkgs.hyprland
           pkgs.procps
           pkgs.coreutils
-          pkgs.gawk
         ];
         text = ''
-          # Hyprland: apply border colors from noctalia.lua without a full reload.
+          # Ensure hyprctl can reach the compositor when hooks inherit a thin env.
+          if [ -z "''${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+            runtime="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+            for d in "$runtime"/hypr/*/; do
+              [ -d "$d" ] || continue
+              HYPRLAND_INSTANCE_SIGNATURE="$(basename "$d")"
+              export HYPRLAND_INSTANCE_SIGNATURE
+              break
+            done
+          fi
+
+          # Hyprland Lua mode rejects `keyword`; re-run noctalia.lua's apply_theme.
           noctalia_lua="$HOME/.config/hypr/noctalia.lua"
-          color_of() {
-            gawk -v n="$1" '
-              $0 ~ ("^local " n " = ") {
-                if (match($0, /"(rgb\([0-9a-fA-F]+\))"/, m)) {
-                  print m[1]
-                  exit
-                }
-              }
-            ' "$noctalia_lua"
-          }
           if [ -f "$noctalia_lua" ]; then
-            primary="$(color_of primary)"
-            surface="$(color_of surface)"
-            secondary="$(color_of secondary)"
-            on_secondary="$(color_of on_secondary)"
-            on_surface="$(color_of on_surface)"
-            error_c="$(color_of error)"
-            on_error="$(color_of on_error)"
-            if [ -n "$primary" ] && [ -n "$surface" ]; then
-              secondary="''${secondary:-$primary}"
-              on_secondary="''${on_secondary:-$primary}"
-              on_surface="''${on_surface:-$surface}"
-              error_c="''${error_c:-$primary}"
-              on_error="''${on_error:-$primary}"
-              hyprctl --batch "\
-                keyword general:col.active_border $primary ;\
-                keyword general:col.inactive_border $surface ;\
-                keyword group:col.border_active $secondary ;\
-                keyword group:col.border_inactive $surface ;\
-                keyword group:col.border_locked_active $error_c ;\
-                keyword group:col.border_locked_inactive $surface ;\
-                keyword group:groupbar:col.active $secondary ;\
-                keyword group:groupbar:col.inactive $surface ;\
-                keyword group:groupbar:col.locked_active $error_c ;\
-                keyword group:groupbar:col.locked_inactive $surface ;\
-                keyword group:groupbar:text_color $on_secondary ;\
-                keyword group:groupbar:text_color_inactive $on_surface ;\
-                keyword group:groupbar:text_color_locked_active $on_error ;\
-                keyword group:groupbar:text_color_locked_inactive $on_surface" \
-                >/dev/null 2>&1 || true
-            fi
+            hyprctl eval "local m = dofile([[$noctalia_lua]]); if type(m) == [[table]] and type(m.apply_theme) == [[function]] then m.apply_theme() end" \
+              >/dev/null 2>&1 || true
           fi
 
           # Community vscode template only writes ~/.vscode; keep Cursor in sync.
@@ -240,7 +212,9 @@
 
         # Builtin ghostty apply.sh reloads the terminal; hyprland/neovim/zen
         # need the colors_changed hook below for live / soft-relaunch updates.
-        hooks.colors_changed = [ (lib.getExe noctaliaOnColorsChanged) ];
+        # Stable /etc path so rebuilds update the script without a Noctalia restart
+        # (store-absolute paths stay frozen in the long-lived daemon env).
+        hooks.colors_changed = [ "/etc/noctalia/on-colors-changed" ];
 
         widget.media.hide_when_no_media = true;
         widget.network.show_label = false;
@@ -315,7 +289,7 @@
         nativeBuildInputs = [ pkgs.makeWrapper ];
         postBuild = ''
           wrapProgram $out/bin/noctalia \
-            --set NOCTALIA_CONFIG_HOME ${configHome} \
+            --set NOCTALIA_CONFIG_HOME /etc/noctalia-config-home \
             --run 'export STARSHIP_CONFIG="''${STARSHIP_CONFIG:-$HOME/.config/starship.toml}"'
         '';
       };
@@ -333,6 +307,11 @@
       programs.gpu-screen-recorder.enable = true;
 
       environment.sessionVariables.QT_QPA_PLATFORMTHEME = "qt6ct";
+
+      # Stable paths: long-lived Noctalia keeps env from launch; /etc symlinks
+      # update on rebuild so hooks/config track the new generation.
+      environment.etc."noctalia-config-home".source = configHome;
+      environment.etc."noctalia/on-colors-changed".source = lib.getExe noctaliaOnColorsChanged;
 
       environment.systemPackages = [
         noctaliaScreenshotNotify
@@ -411,5 +390,22 @@
           ''
         ) normalHomes
       );
+
+      # Soft-relaunch Noctalia so it picks up the new wrapper /etc config home.
+      system.activationScripts.noctaliaRelaunch = lib.stringAfter [ "noctaliaTheming" ] ''
+        export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/1000}"
+        if [ -z "''${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+          for d in "$XDG_RUNTIME_DIR"/hypr/*/; do
+            [ -d "$d" ] || continue
+            HYPRLAND_INSTANCE_SIGNATURE="$(basename "$d")"
+            export HYPRLAND_INSTANCE_SIGNATURE
+            break
+          done
+        fi
+        if command -v hyprctl >/dev/null 2>&1 && [ -n "''${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+          hyprctl dispatch 'hl.dsp.exec_cmd("sh -c '"'"'pkill -f /bin/noctalia || true; pkill -f [.]noctalia-wrapped || true; sleep 0.2; exec noctalia'"'"'")' \
+            >/dev/null 2>&1 || true
+        fi
+      '';
     };
 }

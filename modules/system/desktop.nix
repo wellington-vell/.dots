@@ -28,8 +28,9 @@
       cursor
       lazydocker
       vlc
-      # toolchains
+      toolchains
       agents
+      playwright
     ];
   };
 }

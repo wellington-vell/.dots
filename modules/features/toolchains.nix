@@ -39,6 +39,8 @@
         go
         rustc
         cargo
+        python3
+        uv
       ];
 
       environment.sessionVariables.PATH = [
