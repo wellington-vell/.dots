@@ -56,6 +56,9 @@
           pkgs.findutils
         ];
         text = ''
+          # Store-path shell: Cursor agent sandbox hides /run/current-system.
+          export SHELL="${pkgs.bashInteractive}/bin/bash"
+
           user_exts="$HOME/.cursor/extensions"
           nix_exts="${extensionsEnv}/share/vscode/extensions"
           ext_dir="$HOME/.local/share/cursor-extensions"
@@ -166,6 +169,7 @@
           mkdir -p "$home/.config/Cursor/User" "$home/.cursor/extensions" "$home/.local/share/cursor-extensions"
           ln -sfn ${lib.escapeShellArg "${dots}/config/cursor/settings.json"} "$home/.config/Cursor/User/settings.json"
           ln -sfn ${lib.escapeShellArg "${dots}/config/cursor/keybindings.json"} "$home/.config/Cursor/User/keybindings.json"
+          ln -sfn ${lib.escapeShellArg "${dots}/config/cursor/sandbox.json"} "$home/.cursor/sandbox.json"
           rm -f "$home/.cursor/extensions/.obsolete" "$home/.local/share/cursor-extensions/.obsolete"
           # Remove Nix symlinks mistakenly placed in the user extensions dir.
           find "$home/.cursor/extensions" -mindepth 1 -maxdepth 1 -type l -exec rm -f {} +

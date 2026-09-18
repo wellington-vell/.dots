@@ -1,0 +1,6 @@
+{
+  "additionalReadonlyPaths": [
+    "/nix/var/nix/profiles",
+    "/etc/profiles"
+  ]
+}
