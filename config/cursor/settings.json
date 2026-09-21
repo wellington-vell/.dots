@@ -28,7 +28,7 @@
     "fileHistory": false,
     "repositories": true,
     "searchAndCompare": false,
-    "launchpad": true
+    "launchpad": true,
   },
 
   "nix.enableLanguageServer": true,
@@ -36,14 +36,14 @@
   "nix.serverSettings": {
     "nil": {
       "formatting": {
-        "command": ["nixfmt"]
+        "command": ["nixfmt"],
       },
       "nix": {
         "flake": {
           "autoArchive": true,
-          "autoEvalInputs": true
-        }
-      }
-    }
-  }
+          "autoEvalInputs": true,
+        },
+      },
+    },
+  },
 }

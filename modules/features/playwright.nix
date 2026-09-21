@@ -40,14 +40,14 @@
         nss
         pango
         systemd
-        xorg.libX11
-        xorg.libXcomposite
-        xorg.libXdamage
-        xorg.libXext
-        xorg.libXfixes
-        xorg.libXrandr
-        xorg.libxcb
-        xorg.libxshmfence
+        libx11
+        libxcomposite
+        libxdamage
+        libxext
+        libxfixes
+        libxrandr
+        libxcb
+        libxshmfence
       ];
 
       # Pull the driver from nixpkgs-unstable so the browser revisions track

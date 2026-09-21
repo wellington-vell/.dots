@@ -2,11 +2,20 @@
   {
     "key": "ctrl+e",
     "command": "-cursor.toggleAgentWindowIDEUnification",
-    "when": "!isGlass && workbenchState != 'empty'"
+    "when": "!isGlass && workbenchState != 'empty'",
   },
   {
     "key": "ctrl+j",
     "command": "-workbench.action.togglePanel",
-    "when": "!isAuxiliaryWindowFocusedContext"
-  }
+    "when": "!isAuxiliaryWindowFocusedContext",
+  },
+  {
+    "key": "ctrl+y",
+    "command": "-aichat.newfollowupaction",
+  },
+  {
+    "key": "ctrl+y",
+    "command": "-editor.action.inlineDiffs.acceptPartialEdit",
+    "when": "editorTextFocus && inlineDiffs.activeEditorWithDiffs",
+  },
 ]

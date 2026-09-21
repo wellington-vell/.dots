@@ -37,9 +37,12 @@
         blesh.enable = true;
 
         interactiveShellInit = lib.mkAfter ''
-          # Less noisy than blesh default "[ble: EOF]" for files missing trailing newline.
+          # Less noisy
           if [[ ''${BLE_VERSION-} ]]; then
             bleopt prompt_eol_mark=$'\e[90m⏎\e[m'
+            bleopt exec_elapsed_mark=
+            bleopt exec_errexit_mark=
+            bleopt exec_exit_mark=
           fi
 
           shopt -s histappend checkwinsize
