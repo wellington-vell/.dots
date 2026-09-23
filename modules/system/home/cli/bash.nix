@@ -42,7 +42,6 @@
             bleopt prompt_eol_mark=$'\e[90m⏎\e[m'
             bleopt exec_elapsed_mark=
             bleopt exec_errexit_mark=
-            bleopt exec_exit_mark=
           fi
 
           shopt -s histappend checkwinsize

@@ -3,8 +3,8 @@
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.cpp.disabledLanguages": ["plaintext"],
 
-  "workbench.colorTheme": "NoctaliaTheme",
-  "workbench.preferredDarkColorTheme": "NoctaliaTheme",
+  "workbench.colorTheme": "Bearded Theme Arc",
+  "workbench.preferredDarkColorTheme": "Bearded Theme Arc",
   "workbench.iconTheme": "material-icon-theme",
 
   "terminal.integrated.shellIntegration.enabled": false,
@@ -28,7 +28,7 @@
     "fileHistory": false,
     "repositories": true,
     "searchAndCompare": false,
-    "launchpad": true,
+    "launchpad": true
   },
 
   "nix.enableLanguageServer": true,
@@ -36,14 +36,14 @@
   "nix.serverSettings": {
     "nil": {
       "formatting": {
-        "command": ["nixfmt"],
+        "command": ["nixfmt"]
       },
       "nix": {
         "flake": {
           "autoArchive": true,
-          "autoEvalInputs": true,
-        },
-      },
-    },
-  },
+          "autoEvalInputs": true
+        }
+      }
+    }
+  }
 }

@@ -7,15 +7,26 @@
       ...
     }:
     let
-      vscodeExtensions = with pkgs.vscode-extensions; [
-        pkief.material-icon-theme
-        eamodio.gitlens
-        formulahendry.auto-rename-tag
-        meganrogge.template-string-converter
-        oxc.oxc-vscode
-        bradlc.vscode-tailwindcss
-        jnoortheen.nix-ide
-      ];
+      vscodeExtensions =
+        with pkgs.vscode-extensions;
+        [
+          pkief.material-icon-theme
+          eamodio.gitlens
+          formulahendry.auto-rename-tag
+          meganrogge.template-string-converter
+          oxc.oxc-vscode
+          bradlc.vscode-tailwindcss
+          jnoortheen.nix-ide
+          rust-lang.rust-analyzer
+        ]
+        ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+          {
+            name = "beardedtheme";
+            publisher = "BeardedBear";
+            version = "10.1.0";
+            hash = "sha256-7MkvLEadzgB7af01lYibEOqHn9bvzlpgMTEiiQBlEzA=";
+          }
+        ];
 
       extensionJsonFile = pkgs.writeTextFile {
         name = "vscode-extensions-json";
@@ -59,9 +70,6 @@
               [ -L "$path" ] && continue
               [ -d "$path" ] || continue
               name=$(basename "$path")
-              case "$name" in
-                noctalia.*-universal) continue ;;
-              esac
               ln -sfn "$path" "$ext_dir/$name"
             done
           fi

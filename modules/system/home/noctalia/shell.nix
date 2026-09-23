@@ -83,14 +83,6 @@
               >/dev/null 2>&1 || true
           fi
 
-          # Community vscode template only writes ~/.vscode; keep Cursor in sync.
-          # Both package.json themes use "_watch": true so editors reload on write.
-          src="$HOME/.vscode/extensions/noctalia.noctaliatheme-0.0.5/themes/NoctaliaTheme-color-theme.json"
-          dst="$HOME/.cursor/extensions/noctalia.noctaliatheme-0.0.5/themes/NoctaliaTheme-color-theme.json"
-          if [ -f "$src" ] && [ -d "$(dirname "$dst")" ]; then
-            cp -f "$src" "$dst"
-          fi
-
           # LazyVim / neovim: community apply.sh also signals; nudge again after writes.
           pkill -SIGUSR1 -x nvim >/dev/null 2>&1 || true
 
@@ -106,42 +98,6 @@
           fi
         '';
       };
-
-      # Match the marketplace extension: "_watch": true makes VS Code/Cursor
-      # reload the theme JSON when Noctalia rewrites it (no JS / settings flip).
-      noctaliaVscodePackageJson = pkgs.writeText "noctaliatheme-package.json" ''
-        {
-          "name": "noctaliatheme",
-          "displayName": "NoctaliaTheme",
-          "description": "Noctalia Matugen theme for VS Code, originally forked from Hyprluna's VS Code theme.",
-          "version": "0.0.5",
-          "publisher": "Noctalia",
-          "engines": { "vscode": "^1.106.1" },
-          "categories": ["Themes"],
-          "contributes": {
-            "themes": [
-              {
-                "label": "NoctaliaTheme",
-                "uiTheme": "vs-dark",
-                "path": "./themes/NoctaliaTheme-color-theme.json",
-                "_watch": true
-              }
-            ]
-          }
-        }
-      '';
-
-      noctaliaVscodeThemeSeed = pkgs.writeText "NoctaliaTheme-color-theme.json" ''
-        {
-          "name": "NoctaliaTheme",
-          "type": "dark",
-          "colors": {
-            "editor.background": "#1a1b26",
-            "editor.foreground": "#c0caf5"
-          },
-          "tokenColors": []
-        }
-      '';
 
       settings = {
         bar.default = {
@@ -196,18 +152,10 @@
             "neovim"
             "zen-browser"
             "obsidian"
-            "vscode"
             "steam"
             "fzf"
             "lazygit"
           ];
-          # Community vscode template only knows ~/.vscode; Cursor lives under
-          # ~/.cursor/extensions. Reuse the same community input once cached.
-          # Use ~ (not $XDG_STATE_HOME) — that env is often unset for the daemon.
-          user.cursor = {
-            input_path = "~/.local/state/noctalia/community-templates/vscode/vscode.json";
-            output_path = "~/.cursor/extensions/noctalia.noctaliatheme-0.0.5/themes/NoctaliaTheme-color-theme.json";
-          };
         };
 
         # Builtin ghostty apply.sh reloads the terminal; hyprland/neovim/zen
@@ -330,15 +278,11 @@
           home:
           let
             h = lib.escapeShellArg home;
-            vscodeExt = "${home}/.vscode/extensions/noctalia.noctaliatheme-0.0.5";
-            cursorExt = "${home}/.cursor/extensions/noctalia.noctaliatheme-0.0.5";
           in
           ''
             mkdir -p ${h}/.config/hypr \
                      ${h}/.config/ghostty/themes \
-                     ${h}/.config/qt6ct/colors \
-                     ${lib.escapeShellArg vscodeExt}/themes \
-                     ${lib.escapeShellArg cursorExt}/themes
+                     ${h}/.config/qt6ct/colors
 
             # Store --config is authoritative; a leftover local hyprland.lua makes
             # Noctalia's apply.sh prefer lua-mode patching of a dead file.
@@ -356,36 +300,17 @@
 
             ln -sfn ${qt6ctConfFor home} ${h}/.config/qt6ct/qt6ct.conf
 
-            # Sideload NoctaliaTheme at the path community templates write to.
-            # Marketplace installs land as *-universal and would not receive
-            # Noctalia's updates — remove those duplicates.
-            rm -rf ${h}/.vscode/extensions/noctalia.noctaliatheme-*-universal \
+            # Editors use Bearded Theme now — drop the old Noctalia sideload so
+            # VS Code / Cursor fall back to the Nix-provided BeardedBear theme.
+            rm -rf ${h}/.vscode/extensions/noctalia.noctaliatheme-0.0.5 \
+                   ${h}/.vscode/extensions/noctalia.noctaliatheme-*-universal \
+                   ${h}/.cursor/extensions/noctalia.noctaliatheme-0.0.5 \
                    ${h}/.cursor/extensions/noctalia.noctaliatheme-*-universal
-            rm -f ${lib.escapeShellArg vscodeExt}/extension.js \
-                  ${lib.escapeShellArg cursorExt}/extension.js
-            ln -sfn ${noctaliaVscodePackageJson} ${lib.escapeShellArg vscodeExt}/package.json
-            ln -sfn ${noctaliaVscodePackageJson} ${lib.escapeShellArg cursorExt}/package.json
-            if [ ! -e ${lib.escapeShellArg vscodeExt}/themes/NoctaliaTheme-color-theme.json ]; then
-              cp ${noctaliaVscodeThemeSeed} ${lib.escapeShellArg vscodeExt}/themes/NoctaliaTheme-color-theme.json
-              chmod u+w ${lib.escapeShellArg vscodeExt}/themes/NoctaliaTheme-color-theme.json
-            fi
-            if [ ! -e ${lib.escapeShellArg cursorExt}/themes/NoctaliaTheme-color-theme.json ]; then
-              cp ${noctaliaVscodeThemeSeed} ${lib.escapeShellArg cursorExt}/themes/NoctaliaTheme-color-theme.json
-              chmod u+w ${lib.escapeShellArg cursorExt}/themes/NoctaliaTheme-color-theme.json
-            fi
-            # Seed Cursor from VS Code if Noctalia has already generated once.
-            if [ -f ${lib.escapeShellArg vscodeExt}/themes/NoctaliaTheme-color-theme.json ]; then
-              cp -f ${lib.escapeShellArg vscodeExt}/themes/NoctaliaTheme-color-theme.json \
-                    ${lib.escapeShellArg cursorExt}/themes/NoctaliaTheme-color-theme.json
-              chmod u+w ${lib.escapeShellArg cursorExt}/themes/NoctaliaTheme-color-theme.json
-            fi
 
             chown -R --reference=${h} \
               ${h}/.config/hypr \
               ${h}/.config/ghostty \
               ${h}/.config/qt6ct \
-              ${h}/.vscode \
-              ${h}/.cursor/extensions \
               2>/dev/null || true
           ''
         ) normalHomes

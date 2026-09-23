@@ -23,15 +23,26 @@
           ];
       };
 
-      vscodeExtensions = with unstable.vscode-extensions; [
-        pkief.material-icon-theme
-        eamodio.gitlens
-        formulahendry.auto-rename-tag
-        meganrogge.template-string-converter
-        oxc.oxc-vscode
-        bradlc.vscode-tailwindcss
-        jnoortheen.nix-ide
-      ];
+      vscodeExtensions =
+        with unstable.vscode-extensions;
+        [
+          pkief.material-icon-theme
+          eamodio.gitlens
+          formulahendry.auto-rename-tag
+          meganrogge.template-string-converter
+          oxc.oxc-vscode
+          bradlc.vscode-tailwindcss
+          jnoortheen.nix-ide
+          rust-lang.rust-analyzer
+        ]
+        ++ unstable.vscode-utils.extensionsFromVscodeMarketplace [
+          {
+            name = "beardedtheme";
+            publisher = "BeardedBear";
+            version = "10.1.0";
+            hash = "sha256-7MkvLEadzgB7af01lYibEOqHn9bvzlpgMTEiiQBlEzA=";
+          }
+        ];
 
       # Same layout as vscode-with-extensions: unversioned dirs + extensions.json.
       extensionJsonFile = pkgs.writeTextFile {
@@ -45,9 +56,8 @@
         paths = vscodeExtensions ++ [ extensionJsonFile ];
       };
 
-      # Combined dir: Nix extensions + writable Noctalia sideload + any marketplace
-      # extras still under ~/.cursor/extensions. Avoids .obsolete on Nix links and
-      # keeps Noctalia's template output path (~/.cursor/extensions/noctalia...) writable.
+      # Combined dir: Nix extensions + any marketplace extras still under
+      # ~/.cursor/extensions. Avoids .obsolete on Nix links.
       cursorBin = pkgs.writeShellApplication {
         name = "cursor";
         runtimeInputs = [
@@ -77,7 +87,7 @@
             done
           fi
 
-          # Real user dirs only (Noctalia sideload, remote-ssh, …). Skip stale
+          # Real user dirs only (remote-ssh, …). Skip stale
           # Nix symlinks left in ~/.cursor/extensions from older wrappers.
           if [ -d "$user_exts" ]; then
             for path in "$user_exts"/*; do
@@ -85,10 +95,6 @@
               [ -L "$path" ] && continue
               [ -d "$path" ] || continue
               name=$(basename "$path")
-              # Marketplace -universal copy is not where Noctalia writes themes.
-              case "$name" in
-                noctalia.*-universal) continue ;;
-              esac
               ln -sfn "$path" "$ext_dir/$name"
             done
           fi
