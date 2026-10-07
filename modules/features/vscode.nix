@@ -1,4 +1,8 @@
 {
+  inputs,
+  ...
+}:
+{
   flake.modules.nixos.vscode =
     {
       pkgs,
@@ -7,6 +11,32 @@
       ...
     }:
     let
+      unstable = import inputs.nixpkgs-unstable {
+        inherit (pkgs.stdenv.hostPlatform) system;
+        config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "vscode" ];
+      };
+      vscodeVersion = "1.127.0";
+      vscodeRev = "4fe60c8b1cdac1c4c174f2fb180d0d758272d713";
+      vscodeBase = unstable.vscode.overrideAttrs (old: {
+        version = vscodeVersion;
+        src = pkgs.fetchurl {
+          name = "VSCode_${vscodeVersion}_linux-x64.tar.gz";
+          url = "https://update.code.visualstudio.com/${vscodeVersion}/linux-x64/stable";
+          hash = "sha256-4G+zZ5HJuvdJXUt9wPWqqCVOfRpgpe5D5sfevAXJYrU=";
+        };
+        passthru = old.passthru // {
+          rev = vscodeRev;
+          vscodeServer = pkgs.srcOnly {
+            name = "vscode-server-${vscodeRev}.tar.gz";
+            src = pkgs.fetchurl {
+              name = "vscode-server-${vscodeRev}.tar.gz";
+              url = "https://update.code.visualstudio.com/commit:${vscodeRev}/server-linux-x64/stable";
+              hash = "sha256-JpcbzKdVlfRRKCzG/aDoWEGG7Yg0BcjuqCcg/Nez/9U=";
+            };
+            stdenv = pkgs.stdenvNoCC;
+          };
+        };
+      });
       vscodeExtensions =
         with pkgs.vscode-extensions;
         [
@@ -18,6 +48,8 @@
           bradlc.vscode-tailwindcss
           jnoortheen.nix-ide
           rust-lang.rust-analyzer
+          mkhl.direnv
+          tamasfe.even-better-toml
         ]
         ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
           {
@@ -25,6 +57,13 @@
             publisher = "BeardedBear";
             version = "10.1.0";
             hash = "sha256-7MkvLEadzgB7af01lYibEOqHn9bvzlpgMTEiiQBlEzA=";
+          }
+          {
+            name = "native-preview";
+            publisher = "typescriptteam";
+            version = "0.20260708.2";
+            arch = "linux-x64";
+            hash = "sha256-1ZeBTtzUPfF5GwWY+clgQRoSvCAIj5jfPVn9Y/7PtfM=";
           }
         ];
 
@@ -118,7 +157,7 @@
 
           rm -f "$ext_dir/.obsolete" "$user_exts/.obsolete"
 
-          exec ${lib.getExe pkgs.vscode} --extensions-dir "$ext_dir" "$@"
+          exec ${lib.getExe vscodeBase} --extensions-dir "$ext_dir" "$@"
         '';
       };
 
@@ -126,7 +165,7 @@
         name = "vscode-with-extensions";
         paths = [
           codeBin
-          pkgs.vscode
+          vscodeBase
         ];
       };
 

@@ -1,7 +1,14 @@
 {
+  inputs,
+  ...
+}:
+{
   flake.modules.nixos.toolchains =
     { pkgs, ... }:
     let
+      unstable = import inputs.nixpkgs-unstable {
+        inherit (pkgs.stdenv.hostPlatform) system;
+      };
       bun' = pkgs.bun.overrideAttrs (
         old:
         let
@@ -37,16 +44,25 @@
         nodejs
         bun'
         go
-        rustc
-        cargo
+        unstable.rustc
+        unstable.cargo
+        unstable.clippy
         python3
         uv
+        just
+        # Required by the Rust `clang` crate (https://docs.rs/clang/latest/clang/)
+        # via `clang-sys`: needs `libclang.so` at build/run time.
+        clang
+        libclang
       ];
 
-      environment.sessionVariables.PATH = [
-        "$HOME/.cargo/bin"
-        "$HOME/.bun/bin"
-        "$HOME/go/bin"
-      ];
+      environment.sessionVariables = {
+        PATH = [
+          "$HOME/.cargo/bin"
+          "$HOME/.bun/bin"
+          "$HOME/go/bin"
+        ];
+        LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
+      };
     };
 }

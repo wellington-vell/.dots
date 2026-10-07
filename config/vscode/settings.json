@@ -2,7 +2,6 @@
   "workbench.editor.empty.hint": "hidden",
   "workbench.sideBar.location": "right",
   "workbench.activityBar.location": "top",
-  "workbench.colorTheme": "Bearded Theme Arc",
   "workbench.preferredDarkColorTheme": "Bearded Theme Arc",
   "workbench.iconTheme": "material-icon-theme",
 
@@ -11,6 +10,7 @@
   "terminal.integrated.shellIntegration.enabled": false,
 
   "settingsSync.enable": false,
+  "editor.rulers": [80],
 
   "editor.lineNumbers": "interval",
   "editor.minimap.enabled": false,
@@ -47,5 +47,9 @@
         }
       }
     }
+  },
+  "workbench.colorTheme": "Bearded Theme Arc",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   }
 }

@@ -34,6 +34,8 @@
           bradlc.vscode-tailwindcss
           jnoortheen.nix-ide
           rust-lang.rust-analyzer
+          mkhl.direnv
+          tamasfe.even-better-toml
         ]
         ++ unstable.vscode-utils.extensionsFromVscodeMarketplace [
           {
@@ -41,6 +43,13 @@
             publisher = "BeardedBear";
             version = "10.1.0";
             hash = "sha256-7MkvLEadzgB7af01lYibEOqHn9bvzlpgMTEiiQBlEzA=";
+          }
+          {
+            name = "native-preview";
+            publisher = "typescriptteam";
+            version = "0.20260708.2";
+            arch = "linux-x64";
+            hash = "sha256-1ZeBTtzUPfF5GwWY+clgQRoSvCAIj5jfPVn9Y/7PtfM=";
           }
         ];
 

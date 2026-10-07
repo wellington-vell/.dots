@@ -2,14 +2,13 @@
   "cursor.composer.usageSummaryDisplay": "always",
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.cpp.disabledLanguages": ["plaintext"],
-
-  "workbench.colorTheme": "Bearded Theme Arc",
   "workbench.preferredDarkColorTheme": "Bearded Theme Arc",
   "workbench.iconTheme": "material-icon-theme",
 
   "terminal.integrated.shellIntegration.enabled": false,
 
   "settingsSync.enable": false,
+  "editor.rulers": [80],
 
   "editor.lineNumbers": "interval",
   "editor.cursorBlinking": "solid",
@@ -28,7 +27,7 @@
     "fileHistory": false,
     "repositories": true,
     "searchAndCompare": false,
-    "launchpad": true
+    "launchpad": true,
   },
 
   "nix.enableLanguageServer": true,
@@ -36,14 +35,17 @@
   "nix.serverSettings": {
     "nil": {
       "formatting": {
-        "command": ["nixfmt"]
+        "command": ["nixfmt"],
       },
       "nix": {
         "flake": {
           "autoArchive": true,
-          "autoEvalInputs": true
-        }
-      }
-    }
-  }
+          "autoEvalInputs": true,
+        },
+      },
+    },
+  },
+  "cursor.composer.queueMessageDefaultBehavior": "steer",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.colorTheme": "Bearded Theme Arc",
 }
