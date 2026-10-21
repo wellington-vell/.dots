@@ -16,6 +16,23 @@
             SecurityDevices = {
               "System Trust" = "${pkgs.p11-kit}/lib/pkcs11/p11-kit-trust.so";
             };
+            # NVIDIA + Wayland: Firefox defaults are conservative here and can
+            # fall back to software compositing / CPU video decode, which is
+            # the usual cause of random stutter. Force the GPU paths on.
+            Preferences =
+              let
+                on = {
+                  Value = true;
+                  Status = "default";
+                };
+              in
+              {
+                "gfx.webrender.all" = on;
+                "widget.dmabuf.force-enabled" = on;
+                "media.ffmpeg.vaapi.enabled" = on;
+                "media.hardware-video-decoding.force-enabled" = on;
+                "media.rdd-ffmpeg.enabled" = on;
+              };
             ExtensionSettings = {
               "uBlock0@raymondhill.net" = {
                 install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";

@@ -13,6 +13,10 @@
     environment.sessionVariables = {
       GBM_BACKEND = "nvidia-drm";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      # VA-API hardware video decode via nvidia-vaapi-driver (Firefox/Zen)
+      LIBVA_DRIVER_NAME = "nvidia";
+      NVD_BACKEND = "direct";
+      MOZ_DISABLE_RDD_SANDBOX = "1";
     };
   };
 }

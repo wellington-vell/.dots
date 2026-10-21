@@ -27,6 +27,10 @@
         # Default is paste_from_selection (primary). Browser copy buttons only
         # fill the clipboard, so Shift+Insert would paste empty.
         keybind = shift+insert=paste_from_clipboard
+
+        # Default ctrl+enter toggles fullscreen, which is too easy to hit.
+        keybind = ctrl+enter=unbind
+        keybind = super+ctrl+enter=toggle_fullscreen
       '';
       normalHomes = lib.pipe config.users.users [
         lib.attrValues
