@@ -11,6 +11,10 @@
     url = "github:0xc000022070/zen-browser-flake";
     inputs.nixpkgs.follows = "nixpkgs";
   };
+  inputs.claude-desktop = {
+    url = "github:aaddrick/claude-desktop-debian";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
   inputs.noctalia.url = "github:noctalia-dev/noctalia/cachix";
   inputs.identity = {
     url = "path:/home/well/.secrets";

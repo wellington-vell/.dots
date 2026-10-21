@@ -10,12 +10,26 @@
         position = "0x0";
         primary = true;
         defaultWorkspace = 1;
+        workspaces = [
+          1
+          2
+          3
+        ];
       }
       {
         output = "DVI-D-2";
         mode = "1366x768";
         position = "1920x0";
-        defaultWorkspace = 2;
+        defaultWorkspace = 4;
+        workspaces = [
+          4
+          5
+          6
+          7
+          8
+          9
+          10
+        ];
       }
     ];
 

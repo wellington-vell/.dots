@@ -36,6 +36,11 @@
             default = null;
             description = "Default workspace number for this monitor, if any.";
           };
+          workspaces = lib.mkOption {
+            type = lib.types.listOf lib.types.ints.positive;
+            default = [ ];
+            description = "Workspace numbers bound to this monitor.";
+          };
         };
       };
     in

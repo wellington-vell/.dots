@@ -7,6 +7,15 @@
 
   "terminal.integrated.shellIntegration.enabled": false,
 
+  "files.exclude": {
+    "**/.fallow": true,
+    "**/.devenv": true,
+    "**/.direnv": true,
+    "**/.turbo": true,
+    "**/node_modules": true,
+    "**/target": true,
+  },
+
   "settingsSync.enable": false,
   "editor.rulers": [80],
 
@@ -47,5 +56,6 @@
   },
   "cursor.composer.queueMessageDefaultBehavior": "steer",
   "diffEditor.ignoreTrimWhitespace": false,
+  "git.ignoreRebaseWarning": true,
   "workbench.colorTheme": "Bearded Theme Arc",
 }

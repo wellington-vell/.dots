@@ -1,4 +1,5 @@
 {
+  "workbench.startupEditor": "none",
   "workbench.editor.empty.hint": "hidden",
   "workbench.sideBar.location": "right",
   "workbench.activityBar.location": "top",
@@ -8,6 +9,18 @@
   "diffEditor.ignoreTrimWhitespace": false,
 
   "terminal.integrated.shellIntegration.enabled": false,
+
+  "files.exclude": {
+    "**/.fallow": true,
+    "**/.devenv": true,
+    "**/.husky": true,
+    "**/.opencode": true,
+    "**/.changeset": true,
+    "**/.direnv": true,
+    "**/.turbo": true,
+    "**/node_modules": true,
+    "**/target": true,
+  },
 
   "settingsSync.enable": false,
   "editor.rulers": [80],
@@ -30,7 +43,7 @@
     "fileHistory": false,
     "repositories": true,
     "searchAndCompare": false,
-    "launchpad": true
+    "launchpad": true,
   },
 
   "nix.enableLanguageServer": true,
@@ -38,18 +51,18 @@
   "nix.serverSettings": {
     "nil": {
       "formatting": {
-        "command": ["nixfmt"]
+        "command": ["nixfmt"],
       },
       "nix": {
         "flake": {
           "autoArchive": true,
-          "autoEvalInputs": true
-        }
-      }
-    }
+          "autoEvalInputs": true,
+        },
+      },
+    },
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
   },
   "workbench.colorTheme": "Bearded Theme Arc",
-  "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  }
 }

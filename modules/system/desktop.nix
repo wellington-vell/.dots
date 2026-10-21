@@ -30,6 +30,7 @@
       vlc
       toolchains
       agents
+      claude-desktop
       playwright
     ];
   };

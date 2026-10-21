@@ -19,9 +19,18 @@
 
       workspaceLua = lib.concatMapStrings (
         m:
-        lib.optionalString (m.defaultWorkspace != null) ''
-          hl.workspace_rule({ workspace = "${toString m.defaultWorkspace}", monitor = "${m.output}", default = true })
-        ''
+        let
+          ids = lib.unique (lib.optional (m.defaultWorkspace != null) m.defaultWorkspace ++ m.workspaces);
+        in
+        lib.concatMapStrings (
+          ws:
+          let
+            isDefault = ws == m.defaultWorkspace;
+          in
+          ''
+            hl.workspace_rule({ workspace = "${toString ws}", monitor = "${m.output}"${lib.optionalString isDefault ", default = true"} })
+          ''
+        ) ids
       ) config.host.monitors;
     in
     {

@@ -8,7 +8,12 @@
     let
       unstable = import inputs.nixpkgs-unstable {
         inherit (pkgs.stdenv.hostPlatform) system;
-        config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "cursor-cli" ];
+        config.allowUnfreePredicate =
+          pkg:
+          builtins.elem (lib.getName pkg) [
+            "claude-code"
+            "cursor-cli"
+          ];
       };
       # Upstream install script links both `agent` (primary) and `cursor-agent`
       # (legacy) to the same binary; nixpkgs only ships `cursor-agent`.
@@ -23,6 +28,7 @@
         pkgs.pi-coding-agent
         unstable.cursor-cli
         agentAlias
+        unstable.claude-code
       ];
     };
 }
