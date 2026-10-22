@@ -223,11 +223,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792683113,
-        "narHash": "sha256-Uk/LjMzer4fXWgmgV57ITZ06aztgajm9KG3CqPaP40U=",
+        "lastModified": 1792689006,
+        "narHash": "sha256-6g1i1dJHhabp1OxoWvSGRaAmy0hFE7aiiSzHbLVcIZ4=",
         "owner": "wellington-vell",
         "repo": "phonebridge",
-        "rev": "b769b5474664b823efbd2650fa025db2c0c12ccb",
+        "rev": "feaa77c608c52456c495a03d42cee6d8322154d4",
         "type": "github"
       },
       "original": {
