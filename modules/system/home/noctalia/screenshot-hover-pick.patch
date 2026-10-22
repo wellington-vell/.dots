@@ -1,0 +1,267 @@
+diff --git a/src/capture/screenshot_region_overlay.cpp b/src/capture/screenshot_region_overlay.cpp
+index 90093a9..418fe4e 100644
+--- a/src/capture/screenshot_region_overlay.cpp
++++ b/src/capture/screenshot_region_overlay.cpp
+@@ -47,6 +47,10 @@ namespace capture {
+     constexpr float kDimensionPaddingY = 4.0F;
+     constexpr float kSelectionBorderWidth = 2.0F;
+     constexpr float kDimOpacity = 0.65F;
++    constexpr float kPickBorderWidth = 4.0F;
++    constexpr float kPickFontSize = 18.0F;
++    constexpr float kPickPaddingX = 14.0F;
++    constexpr float kPickPaddingY = 8.0F;
+ 
+     [[nodiscard]] capture::DragMode hitTestSelection(double x, double y, double x0, double y0, double x1, double y1) {
+       constexpr double kHandleMargin = 15.0; // Hitbox size in pixels
+@@ -172,40 +176,6 @@ namespace capture {
+       return "Display";
+     }
+ 
+-    std::unique_ptr<Flex>
+-    buildFullscreenPickerBar(const WaylandConnection& wayland, std::function<void(wl_output*)> onPick) {
+-      auto bar = ui::row(
+-          {
+-              .align = FlexAlign::Center,
+-              .justify = FlexJustify::Center,
+-              .gap = Style::spaceSm,
+-              .paddingV = Style::spaceSm,
+-              .paddingH = Style::spaceMd,
+-              .configure = [](Flex& control) { control.setCardStyle(1.0F, 0.94F, true); },
+-          },
+-          ui::label({
+-              .text = i18n::tr("bar.screenshot.choose-display"),
+-              .fontSize = Style::fontSizeCaption,
+-              .color = colorSpecFromRole(ColorRole::OnSurface),
+-          })
+-      );
+-
+-      for (const auto& out : wayland.outputs()) {
+-        if (out.output == nullptr || out.logicalWidth <= 0 || out.logicalHeight <= 0) {
+-          continue;
+-        }
+-        bar->addChild(
+-            ui::button({
+-                .text = outputPickerLabel(out),
+-                .variant = ButtonVariant::Outline,
+-                .onClick = [onPick, output = out.output]() { onPick(output); },
+-            })
+-        );
+-      }
+-
+-      return bar;
+-    }
+-
+     std::unique_ptr<Flex> buildConfirmHintBar(Label*& hintOut) {
+       return ui::row(
+           {
+@@ -316,6 +286,7 @@ namespace capture {
+     m_confirming = false;
+     m_freezeScreen = false;
+     m_fullscreenPick = false;
++    m_hoveredOutput = nullptr;
+     m_confirmRegion = false;
+     m_frozenScreenshots.clear();
+     destroySurfaces();
+@@ -487,11 +458,18 @@ namespace capture {
+ 
+     auto input = ui::inputArea({
+         .acceptedButtons = InputArea::buttonMask(BTN_LEFT),
+-        .cursorShape = WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_CROSSHAIR,
++        .cursorShape = m_fullscreenPick ? WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_POINTER
++                                        : WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_CROSSHAIR,
+         .focusable = true,
+     });
++    // Full-surface bounds: onClick only fires when the release lands inside the area.
++    input->setSize(w, h);
+ 
+     if (m_fullscreenPick) {
++      // Highlight follows the pointer across outputs (each output has its own surface).
++      input->setOnMotion([this, surfaceOutput = inst.output](const InputArea::PointerData& /*data*/) {
++        setHoveredOutput(surfaceOutput);
++      });
+       input->setOnClick([this, surfaceOutput = inst.output](const InputArea::PointerData& data) {
+         if (data.pressed || data.button != BTN_LEFT) {
+           return;
+@@ -663,6 +641,10 @@ namespace capture {
+       if (!key.pressed) {
+         return;
+       }
++      if (m_fullscreenPick && m_hoveredOutput != nullptr && KeySymbol::isEnterOrSpace(key.sym)) {
++        DeferredCall::callLater([this]() { completeFullscreenPick(m_hoveredOutput); });
++        return;
++      }
+       if (m_confirming) {
+         if (KeybindMatcher::matches(KeybindAction::Copy, key.sym, key.modifiers)) {
+           DeferredCall::callLater([this]() { confirmPendingSelection(ConfirmAction::ForceClipboard); });
+@@ -741,23 +723,18 @@ namespace capture {
+         .color = fixedColorSpec(border),
+     });
+ 
+-    if (!m_fullscreenPick) {
+-      inst.dimensionsLabel = static_cast<Label*>(dimensionsBadge->addChild(std::move(dimensionsLabel)));
+-      inst.selection = static_cast<Box*>(input->addChild(std::move(selection)));
+-      inst.dimensionsBadge = static_cast<Box*>(input->addChild(std::move(dimensionsBadge)));
++    if (m_fullscreenPick) {
++      selection->setBorder(fixedColorSpec(border), kPickBorderWidth);
++      dimensionsBadge->setRadius(Style::radiusMd);
++      dimensionsLabel->setFontSize(kPickFontSize);
+     }
++    inst.dimensionsLabel = static_cast<Label*>(dimensionsBadge->addChild(std::move(dimensionsLabel)));
++    inst.selection = static_cast<Box*>(input->addChild(std::move(selection)));
++    inst.dimensionsBadge = static_cast<Box*>(input->addChild(std::move(dimensionsBadge)));
+     inst.input = input.get();
+     inst.sceneRoot->addChild(std::move(input));
+ 
+-    if (m_fullscreenPick) {
+-      auto pickerBar = buildFullscreenPickerBar(*m_wayland, [this](wl_output* output) {
+-        DeferredCall::callLater([this, output]() { completeFullscreenPick(output); });
+-      });
+-      Flex* pickerBarPtr = pickerBar.get();
+-      inst.sceneRoot->addChild(std::move(pickerBar));
+-      pickerBarPtr->layout(renderer);
+-      pickerBarPtr->setPosition((w - pickerBarPtr->width()) * 0.5F, Style::spaceMd);
+-    } else if (m_confirmRegion) {
++    if (!m_fullscreenPick && m_confirmRegion) {
+       auto hintBar = buildConfirmHintBar(inst.confirmHintLabel);
+       inst.confirmHint = hintBar.get();
+       inst.sceneRoot->addChild(std::move(hintBar));
+@@ -813,6 +790,9 @@ namespace capture {
+       if (onTarget) {
+         target->pointerInside = true;
+         target->inputDispatcher.pointerEnter(static_cast<float>(event.sx), static_cast<float>(event.sy), event.serial);
++        if (m_fullscreenPick) {
++          setHoveredOutput(target->output);
++        }
+       }
+       return onTarget;
+     case PointerEvent::Type::Leave:
+@@ -874,6 +854,10 @@ namespace capture {
+     }
+ 
+     if (!KeybindMatcher::matches(KeybindAction::Cancel, event.sym, event.modifiers)) {
++      if (m_fullscreenPick && m_hoveredOutput != nullptr && KeySymbol::isEnterOrSpace(event.sym)) {
++        completeFullscreenPick(m_hoveredOutput);
++        return true;
++      }
+       if (m_confirming) {
+         if (KeybindMatcher::matches(KeybindAction::Copy, event.sym, event.modifiers)) {
+           confirmPendingSelection(ConfirmAction::ForceClipboard);
+@@ -941,6 +925,47 @@ namespace capture {
+       }
+     };
+ 
++    if (m_fullscreenPick) {
++      for (auto& inst : m_instances) {
++        if (inst->surface == nullptr) {
++          continue;
++        }
++        const auto surfaceW = static_cast<float>(inst->surface->width());
++        const auto surfaceH = static_cast<float>(inst->surface->height());
++        const bool hovered = inst->output == m_hoveredOutput;
++        if (hovered) {
++          layoutDimFrame(*inst, surfaceW, surfaceH, 0.0F, 0.0F, surfaceW, surfaceH);
++        } else {
++          layoutDimFrame(*inst, surfaceW, surfaceH, 0.0F, 0.0F, 0.0F, 0.0F);
++        }
++        if (inst->selection != nullptr) {
++          inst->selection->setVisible(hovered);
++          inst->selection->setPosition(0.0F, 0.0F);
++          inst->selection->setSize(surfaceW, surfaceH);
++        }
++        if (inst->dimensionsBadge == nullptr || inst->dimensionsLabel == nullptr) {
++          continue;
++        }
++        inst->dimensionsBadge->setVisible(hovered);
++        if (!hovered || m_renderContext == nullptr) {
++          continue;
++        }
++        const auto* out = findOutput(*m_wayland, inst->output);
++        std::string text = out != nullptr ? outputPickerLabel(*out) : std::string("Display");
++        if (out != nullptr) {
++          text += "  " + std::to_string(out->logicalWidth) + "x" + std::to_string(out->logicalHeight);
++        }
++        inst->dimensionsLabel->setText(text);
++        inst->dimensionsLabel->measure(inst->surface->renderTarget().renderer());
++        const float badgeWidth = inst->dimensionsLabel->width() + (kPickPaddingX * 2.0F);
++        const float badgeHeight = inst->dimensionsLabel->height() + (kPickPaddingY * 2.0F);
++        inst->dimensionsBadge->setSize(badgeWidth, badgeHeight);
++        inst->dimensionsBadge->setPosition((surfaceW - badgeWidth) * 0.5F, (surfaceH - badgeHeight) * 0.5F);
++        inst->dimensionsLabel->setPosition(kPickPaddingX, kPickPaddingY);
++      }
++      return;
++    }
++
+     if (!m_dragging && !m_confirming) {
+       for (auto& inst : m_instances) {
+         if (inst->surface != nullptr) {
+@@ -1168,6 +1193,19 @@ namespace capture {
+     }
+   }
+ 
++  void ScreenshotRegionOverlay::setHoveredOutput(wl_output* output) {
++    if (!m_fullscreenPick || output == nullptr || output == m_hoveredOutput) {
++      return;
++    }
++    m_hoveredOutput = output;
++    updateSelectionVisuals();
++    for (auto& inst : m_instances) {
++      if (inst->surface != nullptr) {
++        inst->surface->requestRedraw();
++      }
++    }
++  }
++
+   void ScreenshotRegionOverlay::completeFullscreenPick(wl_output* output) {
+     if (!m_active || output == nullptr || m_wayland == nullptr) {
+       if (m_onComplete) {
+diff --git a/src/capture/screenshot_region_overlay.h b/src/capture/screenshot_region_overlay.h
+index ac21143..c6ac3b8 100644
+--- a/src/capture/screenshot_region_overlay.h
++++ b/src/capture/screenshot_region_overlay.h
+@@ -47,6 +47,8 @@ namespace capture {
+     void setFailureCallback(FailureCallback callback);
+     void setConfirmKeybindLabels(std::string copyLabel, std::string saveLabel, std::string cancelLabel);
+     void setFrozenScreenshots(std::vector<FrozenScreenshot> screenshots);
++    // Output highlighted when a fullscreen pick starts, before the pointer moves.
++    void setInitialPickOutput(wl_output* output) noexcept { m_hoveredOutput = output; }
+     [[nodiscard]] std::vector<FrozenScreenshot> takeFrozenScreenshots();
+     void begin(
+         bool freezeScreen, bool fullscreenPick = false, bool confirmRegion = false,
+@@ -81,6 +83,7 @@ namespace capture {
+     void completeSelection();
+     void confirmPendingSelection(ConfirmAction action = ConfirmAction::None);
+     void completeFullscreenPick(wl_output* output);
++    void setHoveredOutput(wl_output* output);
+     [[nodiscard]] std::optional<LogicalRect> selectionRectIfValid() const;
+ 
+     WaylandConnection* m_wayland = nullptr;
+@@ -96,6 +99,7 @@ namespace capture {
+     bool m_active = false;
+     bool m_freezeScreen = false;
+     bool m_fullscreenPick = false;
++    wl_output* m_hoveredOutput = nullptr;
+     bool m_confirmRegion = false;
+     bool m_confirming = false;
+     bool m_dragging = false;
+diff --git a/src/capture/screenshot_service.cpp b/src/capture/screenshot_service.cpp
+index 31eeda0..bdc7f0d 100644
+--- a/src/capture/screenshot_service.cpp
++++ b/src/capture/screenshot_service.cpp
+@@ -878,6 +878,7 @@ void ScreenshotService::startFullscreenOverlay(RenderContext& renderContext) {
+   m_regionFullscreenPick = true;
+   ensureRegionOverlay();
+   m_regionOverlay->setFrozenScreenshots({});
++  m_regionOverlay->setInitialPickOutput(preferredCaptureOutput());
+   m_regionOverlay->begin(false, true, false);
+ }
+ 
+@@ -976,6 +977,9 @@ void ScreenshotService::finishFreezeCapture() {
+ 
+   ensureRegionOverlay();
+   m_regionOverlay->setFrozenScreenshots(std::move(m_frozenScreenshots));
++  if (m_regionFullscreenPick) {
++    m_regionOverlay->setInitialPickOutput(preferredCaptureOutput());
++  }
+   const std::optional<LogicalRect> initial =
+       (!m_regionFullscreenPick && m_regionOutputOptions.rememberLastRegion) ? loadRememberedRegion() : std::nullopt;
+   m_regionOverlay->begin(

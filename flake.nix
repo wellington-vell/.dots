@@ -16,10 +16,15 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.phonebridge = {
-    url = "github:wellington-vell/wo-mic-linux";
+    url = "github:wellington-vell/phonebridge";
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.noctalia.url = "github:noctalia-dev/noctalia/cachix";
+  # Source for the patched screen_recorder plugin (modules/system/home/noctalia).
+  inputs.noctalia-plugins = {
+    url = "github:noctalia-dev/official-plugins";
+    flake = false;
+  };
   inputs.identity = {
     url = "path:/home/well/.secrets";
     flake = false;

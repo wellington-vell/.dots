@@ -50,9 +50,51 @@
         '';
       };
 
+      # Screen recorder "saved" toast (called by the patched plugin, since
+      # noctalia.notify has no actions): click/Open plays the file with the
+      # default video app (xdg-mime video/mp4).
+      noctaliaMediaNotify = pkgs.writeShellApplication {
+        name = "noctalia-media-notify";
+        runtimeInputs = [
+          pkgs.libnotify
+          pkgs.xdg-utils
+        ];
+        text = ''
+          title="$1"
+          path="$2"
+          if [[ ! -f "$path" ]]; then
+            exit 0
+          fi
+          action="$(notify-send \
+            --app-name="Screen Recorder" \
+            --icon=video-x-generic \
+            --action=default=Open \
+            --wait \
+            --expire-time=10000 \
+            "$title" \
+            "$path")"
+          if [[ "$action" == "default" ]]; then
+            xdg-open "$path"
+          fi
+        '';
+      };
+
       wallpapers = "${self}/assets/wallpapers";
 
       phonebridgePkg = inputs.phonebridge.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+      # Official screen_recorder under its own id, patched with a "pick" video source
+      # (hover-highlight a screen with slurp, click to record it) and bar tooltips.
+      patchedPlugins = pkgs.linkFarm "noctalia-patched-plugins" [
+        {
+          name = "screen_recorder";
+          path = pkgs.applyPatches {
+            name = "noctalia-screen-recorder";
+            src = "${inputs.noctalia-plugins}/screen_recorder";
+            patches = [ ./screen-recorder-pick.patch ];
+          };
+        }
+      ];
 
       # Default browser for Zen soft-relaunch (host.apps.browser).
       defaultBrowser = config.host.apps.browser;
@@ -115,8 +157,9 @@
             "notifications"
             "clipboard"
             "screenshot"
-            "noctalia/screen_recorder:recorder"
+            "wellington-vell/screen_recorder:recorder"
             "wellington-vell/phonebridge:toggle"
+            "wellington-vell/phonebridge:camera"
             "network"
             "bluetooth"
             "volume"
@@ -171,7 +214,7 @@
         widget.network.show_label = false;
 
         plugins.enabled = [
-          "noctalia/screen_recorder"
+          "wellington-vell/screen_recorder"
           "wellington-vell/phonebridge"
         ];
         # Declaring sources replaces Noctalia's defaults, so keep official +
@@ -195,8 +238,21 @@
             location = "${phonebridgePkg}/share/noctalia-plugins";
             enabled = true;
           }
+          {
+            name = "patched";
+            kind = "path";
+            location = "${patchedPlugins}";
+            enabled = true;
+          }
         ];
-        plugin_settings."noctalia/screen_recorder".video_source = "focused";
+        # Screen glyphs so the recorder doesn't share "video" with the Phonebridge camera.
+        plugin_settings."wellington-vell/screen_recorder" = {
+          video_source = "pick";
+          glyph_unavailable = "screen-share-off";
+          glyph_idle = "screen-share";
+          glyph_pending = "screen-share";
+          glyph_recording = "screen-share";
+        };
 
         shell.screenshot = {
           pipe_to_command = true;
@@ -218,7 +274,7 @@
           { type = "nightlight"; }
           { type = "notification"; }
           { type = "power_profile"; }
-          { type = "screen_recorder"; }
+          { type = "wellington-vell/screen_recorder:toggle"; }
         ];
       };
 
@@ -245,7 +301,13 @@
         foreground = #c0caf5
       '';
 
-      noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      # Fullscreen display pick: highlight the output under the pointer (seeded from
+      # Hyprland's focused monitor) and click it, instead of the "Choose display" bar.
+      noctaliaPkg =
+        inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+          (old: {
+            patches = (old.patches or [ ]) ++ [ ./screenshot-hover-pick.patch ];
+          });
 
       # Store-managed config home: Noctalia reads $NOCTALIA_CONFIG_HOME/noctalia/*.toml
       # (no ~/.config symlink / activationScripts).
@@ -291,6 +353,8 @@
 
       environment.systemPackages = [
         noctaliaScreenshotNotify
+        noctaliaMediaNotify
+        pkgs.slurp
         pkgs.libnotify
         pkgs.xdg-utils
         pkgs.loupe
@@ -344,20 +408,38 @@
         ) normalHomes
       );
 
-      # Soft-relaunch Noctalia so it picks up the new wrapper /etc config home.
-      system.activationScripts.noctaliaRelaunch = lib.stringAfter [ "noctaliaTheming" ] ''
-        export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/1000}"
-        if [ -z "''${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
-          for d in "$XDG_RUNTIME_DIR"/hypr/*/; do
-            [ -d "$d" ] || continue
-            HYPRLAND_INSTANCE_SIGNATURE="$(basename "$d")"
-            export HYPRLAND_INSTANCE_SIGNATURE
-            break
+      # Relaunch Noctalia when its package or config changed, so a rebuild applies
+      # without a manual restart. Activation runs as root with a minimal PATH (no
+      # hyprctl/pkill), so use store paths, and borrow the Hyprland session from the
+      # running Noctalia's environment. Starting the new store path directly avoids
+      # resolving `noctalia` through a not-yet-switched /run/current-system.
+      system.activationScripts.noctaliaRelaunch = lib.stringAfter [ "noctaliaTheming" "users" ] ''
+        stamp=/run/noctalia-generation
+        want=${lib.escapeShellArg "${noctaliaWrapped} ${configHome}"}
+        if [ "$(cat "$stamp" 2>/dev/null)" != "$want" ]; then
+          user=""
+          sessionEnv=""
+          for pid in $(${pkgs.procps}/bin/pgrep -f '[.]noctalia-wrapped'); do
+            if [ -z "$user" ]; then
+              user="$(stat -c %U "/proc/$pid" 2>/dev/null)" || user=""
+              sessionEnv="$(tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null \
+                | grep -E '^(XDG_RUNTIME_DIR|HYPRLAND_INSTANCE_SIGNATURE|WAYLAND_DISPLAY)=')" || sessionEnv=""
+            fi
+            kill "$pid" 2>/dev/null || true
           done
-        fi
-        if command -v hyprctl >/dev/null 2>&1 && [ -n "''${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
-          hyprctl dispatch 'hl.dsp.exec_cmd("sh -c '"'"'pkill -f /bin/noctalia || true; pkill -f [.]noctalia-wrapped || true; sleep 0.2; exec noctalia'"'"'")' \
-            >/dev/null 2>&1 || true
+          for _ in $(seq 30); do
+            ${pkgs.procps}/bin/pgrep -f '[.]noctalia-wrapped' >/dev/null || break
+            sleep 0.1
+          done
+          ${pkgs.procps}/bin/pkill -9 -f '[.]noctalia-wrapped' || true
+
+          if [ -n "$user" ] && [ -n "$sessionEnv" ]; then
+            # shellcheck disable=SC2086
+            runuser -u "$user" -- env $sessionEnv \
+              ${config.programs.hyprland.package}/bin/hyprctl dispatch \
+              'hl.dsp.exec_cmd("${noctaliaWrapped}/bin/noctalia")' >/dev/null 2>&1 || true
+          fi
+          echo "$want" >"$stamp"
         fi
       '';
     };

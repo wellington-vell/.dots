@@ -200,6 +200,22 @@
         "type": "github"
       }
     },
+    "noctalia-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792622780,
+        "narHash": "sha256-a4hRxpo88vn4G5I7IE4WW9JpSxD3Bw2daBI5C+DkT4c=",
+        "owner": "noctalia-dev",
+        "repo": "official-plugins",
+        "rev": "10dd0255e45297e5d8a41c78f08387a7bbd21b1c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "official-plugins",
+        "type": "github"
+      }
+    },
     "phonebridge": {
       "inputs": {
         "nixpkgs": [
@@ -207,16 +223,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1792678764,
-        "narHash": "sha256-QsdjdUmAj7Zu6Psxdg8HzAMoUOFCtlUw+XrdBlZB0NA=",
+        "lastModified": 1792683113,
+        "narHash": "sha256-Uk/LjMzer4fXWgmgV57ITZ06aztgajm9KG3CqPaP40U=",
         "owner": "wellington-vell",
-        "repo": "wo-mic-linux",
-        "rev": "0e696a4e3d067f9e8c7bce506c159c2c160d7db1",
+        "repo": "phonebridge",
+        "rev": "b769b5474664b823efbd2650fa025db2c0c12ccb",
         "type": "github"
       },
       "original": {
         "owner": "wellington-vell",
-        "repo": "wo-mic-linux",
+        "repo": "phonebridge",
         "type": "github"
       }
     },
@@ -229,6 +245,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "noctalia": "noctalia",
+        "noctalia-plugins": "noctalia-plugins",
         "phonebridge": "phonebridge",
         "zen-browser": "zen-browser"
       }

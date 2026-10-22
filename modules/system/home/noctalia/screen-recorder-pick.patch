@@ -1,0 +1,280 @@
+diff --git a/plugin.toml b/plugin.toml
+index 1219c6b..6fa14f8 100644
+--- a/plugin.toml
++++ b/plugin.toml
+@@ -10,7 +10,7 @@
+ # Settings are plugin-level ([[setting]] at the root): one set shared by every
+ # entry, edited from Settings → Plugins, seeded into noctalia.getConfig everywhere.
+ 
+-id = "noctalia/screen_recorder"
++id = "wellington-vell/screen_recorder"
+ name = "Screen Recorder"
+ version = "1.4.1"
+ plugin_api = 17
+@@ -31,6 +31,7 @@ options = [
+   { value = "focused", label_key = "settings.video_source.options.focused" },
+   { value = "portal", label_key = "settings.video_source.options.portal" },
+   { value = "region", label_key = "settings.video_source.options.region"},
++  { value = "pick", label_key = "settings.video_source.options.pick" },
+ ]
+ 
+ [[setting]]
+diff --git a/recorder.luau b/recorder.luau
+index 4bcc020..778df54 100644
+--- a/recorder.luau
++++ b/recorder.luau
+@@ -40,6 +40,7 @@ local function applyStatus(status)
+     local hideInactive = noctalia.getConfig("hide_inactive")
+ 
+     if not available then
++        barWidget.setTooltip(noctalia.tr("tooltip.unavailable"))
+         barWidget.setGlyph(glyphFor("glyph_unavailable", "video-off"))
+         barWidget.setGlyphColor("on_surface_variant")
+         barWidget.setVisible(not hideInactive)
+@@ -47,21 +48,25 @@ local function applyStatus(status)
+     end
+ 
+     if state == "recording" then
++        barWidget.setTooltip(noctalia.tr("tooltip.recording"))
+         barWidget.setGlyph(glyphFor("glyph_recording", "video"))
+         barWidget.setGlyphColor("error")
+         barWidget.setColor("error")
+         barWidget.setVisible(true)
+     elseif table.find(PENDING_STATES, state) then
++        barWidget.setTooltip(noctalia.tr(if state == "replay_pending" then "tooltip.replay-pending" else "tooltip.pending"))
+         barWidget.setGlyph(glyphFor("glyph_pending", "video"))
+         barWidget.setGlyphColor("primary")
+         barWidget.setColor("primary")
+         barWidget.setVisible(true)
+     elseif state == "replaying" then
++        barWidget.setTooltip(noctalia.tr("tooltip.replaying"))
+         barWidget.setGlyph(glyphFor("glyph_replaying", "repeat"))
+         barWidget.setGlyphColor("secondary")
+         barWidget.setColor("secondary")
+         barWidget.setVisible(true)
+     else
++        barWidget.setTooltip(noctalia.tr(if noctalia.getConfig("replay_enabled") then "tooltip.idle-replay" else "tooltip.idle"))
+         barWidget.setGlyph(glyphFor("glyph_idle", "video"))
+         barWidget.setGlyphColor("on_surface")
+         barWidget.setVisible(not hideInactive)
+diff --git a/recorder_service.luau b/recorder_service.luau
+index e2d9709..7e7a3d0 100644
+--- a/recorder_service.luau
++++ b/recorder_service.luau
+@@ -27,6 +27,7 @@ local checkedAvailability = false
+ local processCheckPending = false
+ local stateGeneration = 0
+ local regionGeometry = nil
++local pickedOutput = nil
+ local pickInProcess = false
+ local updateDisplay
+ local lastStatusKey
+@@ -121,6 +122,7 @@ local function setState(nextState)
+     stateGeneration += 1
+     if nextState == "idle" then
+         regionGeometry = nil
++        pickedOutput = nil
+     end
+ end
+ 
+@@ -206,6 +208,17 @@ local function signalRecorder(signal, replayOnly, forceAfterDelay)
+     noctalia.runAsync(cmd)
+ end
+ 
++-- Saved-file toast with a click-to-open action when the system helper is installed
++-- (noctalia.notify has no actions); otherwise the plain toast.
++local MEDIA_NOTIFY = "noctalia-media-notify"
++local function notifySaved(title, path)
++    if path ~= nil and path ~= "" and noctalia.commandExists(MEDIA_NOTIFY) then
++        noctalia.runAsync({ MEDIA_NOTIFY, title, path })
++    else
++        noctalia.notify(title, path)
++    end
++end
++
+ -- notifyIfMissing: when the recorder ended on its own (not a user stop) and no
+ -- output file exists, gpu-screen-recorder died early - surface its captured output.
+ local function notifyRecordingSavedIfPresent(notifyIfMissing)
+@@ -226,7 +239,7 @@ local function notifyRecordingSavedIfPresent(notifyIfMissing)
+         end
+ 
+         log(`recording saved: {savedPath}`)
+-        noctalia.notify(noctalia.tr("notify.recording-saved"), savedPath)
++        notifySaved(noctalia.tr("notify.recording-saved"), savedPath)
+         if cfg("copy_to_clipboard") then
+             copyToClipboard(savedPath)
+         end
+@@ -291,7 +304,7 @@ end
+ -- Capture modes a caller may request. An IPC override outside this set is
+ -- discarded so an arbitrary payload can never reach the gpu-screen-recorder
+ -- command line.
+-local VIDEO_SOURCES = { focused = true, portal = true, region = true }
++local VIDEO_SOURCES = { focused = true, portal = true, region = true, pick = true }
+ 
+ local function selectedVideoSource(sourceOverride)
+     if sourceOverride ~= nil and VIDEO_SOURCES[sourceOverride] then
+@@ -304,6 +317,9 @@ end
+ 
+ local function resolveVideoSource(errorTitle, focusedOutputName, sourceOverride)
+     local source = selectedVideoSource(sourceOverride)
++    if source == "pick" then
++        return pickedOutput
++    end
+     if source ~= "focused" then
+         return source
+     end
+@@ -354,6 +370,61 @@ local function pickRegionThen(errorTitle, proceed)
+     end)
+ end
+ 
++-- Screen Picker -------------------------------------------------------------------
++
++-- slurp in output mode: the screen under the pointer is shown clear with a border in
++-- the theme's primary color (read from Noctalia's generated Hyprland theme), the
++-- others are dimmed, and a click prints that output's connector name.
++local OUTPUT_PICK_CMD = [[
++c=$(sed -n 's/^local primary = "rgb(\([0-9a-fA-F]\{6\}\))".*/\1/p' "$HOME/.config/hypr/noctalia.lua" 2>/dev/null)
++exec slurp -o -r -f '%o' -b '#000000a6' -B '#00000000' -s '#00000000' -c "#${c:-7aa2f7}ff" -w 4
++]]
++
++local function isKnownOutput(name)
++    for _, out in noctalia.outputs() do
++        if out.name == name then return true end
++    end
++    return false
++end
++
++local function pickOutputAsync(errorTitle, callback)
++    local outputs = noctalia.outputs()
++    if #outputs == 1 then
++        callback(outputs[1].name)
++        return
++    end
++    if not noctalia.commandExists("slurp") then
++        log("screen pick: slurp not found")
++        noctalia.notifyError(errorTitle, noctalia.tr("notify.output-picker-missing"))
++        callback(nil)
++        return
++    end
++
++    log("screen pick: waiting for a click")
++    local ok = noctalia.runAsync(OUTPUT_PICK_CMD, function(result)
++        local name = noctalia.string.trim(result.stdout or "")
++        if result.exitCode ~= 0 or not isKnownOutput(name) then
++            log("screen pick: cancelled or unknown output")
++            callback(nil)
++            return
++        end
++        log(`screen pick: picked {name}`)
++        callback(name)
++    end)
++    if not ok then callback(nil) end
++end
++
++-- Pick a screen then run `proceed` with pickedOutput set, guards reentry
++local function pickOutputThen(errorTitle, proceed)
++    pickInProcess = true
++    pickOutputAsync(errorTitle, function(name)
++        pickInProcess = false
++        if state ~= "idle" or name == nil then return end
++        pickedOutput = name
++        proceed()
++    end)
++end
++
+ local function buildGsrPrefix()
+     return [[
+ _gpuscreenrecorder_flatpak_installed() {
+@@ -491,6 +562,12 @@ local function startRecording(focusedOutputName, sourceOverride)
+         end)
+         return
+     end
++    if selectedVideoSource(sourceOverride) == "pick" and pickedOutput == nil then
++        pickOutputThen(noctalia.tr("notify.recording-failed"), function()
++            startRecording(focusedOutputName, sourceOverride)
++        end)
++        return
++    end
+ 
+     setState("pending")
+     pendingSince = tickCount
+@@ -551,6 +628,12 @@ local function startReplay(focusedOutputName, sourceOverride)
+         end)
+         return
+     end
++    if selectedVideoSource(sourceOverride) == "pick" and pickedOutput == nil then
++        pickOutputThen(noctalia.tr("notify.replay-failed"), function()
++            startReplay(focusedOutputName, sourceOverride)
++        end)
++        return
++    end
+ 
+     setState("replay_pending")
+     pendingSince = tickCount
+@@ -616,14 +699,20 @@ local function saveReplay()
+         local attempts = 50
+         local function poll()
+             noctalia.runAsync(`sleep 0.2; {claim}`, function(result)
+-                if result.exitCode == 0 then return end
++                if result.exitCode == 0 then
++                    notifySaved(noctalia.tr("notify.replay-saved"), targetFile)
++                    return
++                end
+                 if attempts > 0 then
+                     attempts -= 1
+                     poll()
++                else
++                    noctalia.notify(noctalia.tr("notify.replay-saved"))
+                 end
+             end)
+         end
+         poll()
++        return
+     end
+ 
+     noctalia.notify(noctalia.tr("notify.replay-saved"))
+diff --git a/translations/en.json b/translations/en.json
+index ad738b5..fd18957 100644
+--- a/translations/en.json
++++ b/translations/en.json
+@@ -10,7 +10,8 @@
+     "replay-active": "Replay buffer active",
+     "replay-failed": "Replay failed",
+     "replay-saved": "Replay saved",
+-    "replay-stopped": "Replay buffer stopped"
++    "replay-stopped": "Replay buffer stopped",
++    "output-picker-missing": "Install slurp to pick a screen"
+   },
+   "settings": {
+     "audio_bitrate": {
+@@ -171,12 +172,13 @@
+       }
+     },
+     "video_source": {
+-      "description": "Capture mode: Focused records Noctalia's focused monitor, Region asks you to drag an area first",
++      "description": "Capture mode: Focused records Noctalia's focused monitor, Pick highlights the screen under the mouse and records the one you click, Region asks you to drag an area first",
+       "label": "Video Source",
+       "options": {
+         "focused": "Focused",
+         "portal": "Portal",
+-        "region": "Region"
++        "region": "Region",
++        "pick": "Pick screen"
+       }
+     }
+   },
+@@ -184,5 +186,14 @@
+     "record-screen": "Record Screen",
+     "recording": "Recording",
+     "replay-buffer": "Replay Buffer"
++  },
++  "tooltip": {
++    "unavailable": "Screen recorder: gpu-screen-recorder not available",
++    "idle": "Screen recorder: click to pick a screen and record",
++    "idle-replay": "Screen recorder: click to pick a screen and record — right-click to start the replay buffer",
++    "pending": "Screen recorder: starting… — click to cancel",
++    "recording": "Screen recorder: recording — click to stop and save",
++    "replay-pending": "Screen recorder: starting replay buffer… — click to cancel",
++    "replaying": "Screen recorder: replay buffer running — right/middle-click to save the last clip, click to stop"
+   }
+ }
