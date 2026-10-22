@@ -52,6 +52,8 @@
 
       wallpapers = "${self}/assets/wallpapers";
 
+      phonebridgePkg = inputs.phonebridge.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
       # Default browser for Zen soft-relaunch (host.apps.browser).
       defaultBrowser = config.host.apps.browser;
 
@@ -114,6 +116,7 @@
             "clipboard"
             "screenshot"
             "noctalia/screen_recorder:recorder"
+            "wellington-vell/phonebridge:toggle"
             "network"
             "bluetooth"
             "volume"
@@ -167,7 +170,32 @@
         widget.media.hide_when_no_media = true;
         widget.network.show_label = false;
 
-        plugins.enabled = [ "noctalia/screen_recorder" ];
+        plugins.enabled = [
+          "noctalia/screen_recorder"
+          "wellington-vell/phonebridge"
+        ];
+        # Declaring sources replaces Noctalia's defaults, so keep official +
+        # community listed. The Phonebridge bar toggle ships inside its package.
+        plugins.source = [
+          {
+            name = "official";
+            kind = "git";
+            location = "https://github.com/noctalia-dev/official-plugins";
+            enabled = true;
+          }
+          {
+            name = "community";
+            kind = "git";
+            location = "https://github.com/noctalia-dev/community-plugins";
+            enabled = true;
+          }
+          {
+            name = "phonebridge";
+            kind = "path";
+            location = "${phonebridgePkg}/share/noctalia-plugins";
+            enabled = true;
+          }
+        ];
         plugin_settings."noctalia/screen_recorder".video_source = "focused";
 
         shell.screenshot = {

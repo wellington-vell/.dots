@@ -15,6 +15,10 @@
     url = "github:aaddrick/claude-desktop-debian";
     inputs.nixpkgs.follows = "nixpkgs";
   };
+  inputs.phonebridge = {
+    url = "github:wellington-vell/wo-mic-linux";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
   inputs.noctalia.url = "github:noctalia-dev/noctalia/cachix";
   inputs.identity = {
     url = "path:/home/well/.secrets";

@@ -32,6 +32,7 @@
       agents
       claude-desktop
       playwright
+      phonebridge
     ];
   };
 }

@@ -92,7 +92,19 @@
 
           mkdir -p "$user_exts" "$ext_dir"
 
-          find "$ext_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          rm -f "$ext_dir/.obsolete" "$user_exts/.obsolete"
+
+          # Rebuilding while the editor runs makes it drop extensions (theme
+          # resets), and CLI calls like `--install-extension` (Claude Code does
+          # this on start) go through this wrapper too. Only rebuild when the
+          # Nix set or user sideloads changed.
+          stamp="$nix_exts $(find "$user_exts" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | tr '\n' ' ')"
+          if [ "$(cat "$ext_dir/.nix-stamp" 2>/dev/null || true)" = "$stamp" ]; then
+            exec ${lib.getExe vscodeBase} --extensions-dir "$ext_dir" "$@"
+          fi
+
+          # Drop previous links; keep real dirs installed via --install-extension.
+          find "$ext_dir" -mindepth 1 -maxdepth 1 -type l -exec rm -f {} +
 
           if [ -d "$nix_exts" ]; then
             for path in "$nix_exts"/*; do
@@ -119,9 +131,9 @@
                 .location.fsPath = ($d + "/" + .relativeLocation)
                 | .location.path = .location.fsPath
               )
-            ' "$nix_exts/extensions.json" >"$ext_dir/extensions.json"
+            ' "$nix_exts/extensions.json" >"$ext_dir/extensions.json.new"
           else
-            echo '[]' >"$ext_dir/extensions.json"
+            echo '[]' >"$ext_dir/extensions.json.new"
           fi
 
           for path in "$ext_dir"/*; do
@@ -131,7 +143,7 @@
             id=$(jq -r '((.publisher // "") + "." + (.name // "")) | ascii_downcase' "$path/package.json" 2>/dev/null || true)
             ver=$(jq -r '.version // "0.0.0"' "$path/package.json" 2>/dev/null || echo "0.0.0")
             [ -n "$id" ] && [ "$id" != "null.null" ] || continue
-            if jq -e --arg id "$id" 'any(.identifier.id == $id)' "$ext_dir/extensions.json" >/dev/null; then
+            if jq -e --arg id "$id" 'any(.identifier.id == $id)' "$ext_dir/extensions.json.new" >/dev/null; then
               continue
             fi
             jq --arg id "$id" --arg ver "$ver" --arg path "$path" --arg rel "$name" '
@@ -151,11 +163,11 @@
                   updated: false
                 }
               }]
-            ' "$ext_dir/extensions.json" >"$ext_dir/extensions.json.tmp"
-            mv -f "$ext_dir/extensions.json.tmp" "$ext_dir/extensions.json"
+            ' "$ext_dir/extensions.json.new" >"$ext_dir/extensions.json.tmp"
+            mv -f "$ext_dir/extensions.json.tmp" "$ext_dir/extensions.json.new"
           done
-
-          rm -f "$ext_dir/.obsolete" "$user_exts/.obsolete"
+          mv -f "$ext_dir/extensions.json.new" "$ext_dir/extensions.json"
+          printf '%s' "$stamp" >"$ext_dir/.nix-stamp"
 
           exec ${lib.getExe vscodeBase} --extensions-dir "$ext_dir" "$@"
         '';

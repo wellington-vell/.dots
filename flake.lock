@@ -200,6 +200,26 @@
         "type": "github"
       }
     },
+    "phonebridge": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792678764,
+        "narHash": "sha256-QsdjdUmAj7Zu6Psxdg8HzAMoUOFCtlUw+XrdBlZB0NA=",
+        "owner": "wellington-vell",
+        "repo": "wo-mic-linux",
+        "rev": "0e696a4e3d067f9e8c7bce506c159c2c160d7db1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "wellington-vell",
+        "repo": "wo-mic-linux",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "claude-desktop": "claude-desktop",
@@ -209,6 +229,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "noctalia": "noctalia",
+        "phonebridge": "phonebridge",
         "zen-browser": "zen-browser"
       }
     },
