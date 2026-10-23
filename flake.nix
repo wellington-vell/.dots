@@ -19,6 +19,10 @@
     url = "github:wellington-vell/phonebridge";
     inputs.nixpkgs.follows = "nixpkgs";
   };
+  # Android dev shell of the Phonebridge app (app/flake.nix). No `follows`:
+  # keeping its own nixpkgs pin makes the store paths identical to
+  # `nix develop ./app`, so the SDK/NDK rooted here are the ones builds use.
+  inputs.phonebridge-app.url = "github:wellington-vell/phonebridge?dir=app";
   inputs.noctalia.url = "github:noctalia-dev/noctalia/cachix";
   # Source for the patched screen_recorder plugin (modules/system/home/noctalia).
   inputs.noctalia-plugins = {

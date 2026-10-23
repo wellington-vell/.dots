@@ -1,7 +1,11 @@
 {
   inputs,
+  config,
   ...
 }:
+let
+  inherit (config.flake.lib) mkEditorWrapper;
+in
 {
   flake.modules.nixos.cursor =
     {
@@ -23,150 +27,20 @@
           ];
       };
 
-      vscodeExtensions =
-        with unstable.vscode-extensions;
-        [
-          pkief.material-icon-theme
-          eamodio.gitlens
-          formulahendry.auto-rename-tag
-          meganrogge.template-string-converter
-          oxc.oxc-vscode
-          bradlc.vscode-tailwindcss
-          jnoortheen.nix-ide
-          rust-lang.rust-analyzer
-          mkhl.direnv
-          tamasfe.even-better-toml
-        ]
-        ++ unstable.vscode-utils.extensionsFromVscodeMarketplace [
-          {
-            name = "beardedtheme";
-            publisher = "BeardedBear";
-            version = "10.1.0";
-            hash = "sha256-7MkvLEadzgB7af01lYibEOqHn9bvzlpgMTEiiQBlEzA=";
-          }
-          {
-            name = "native-preview";
-            publisher = "typescriptteam";
-            version = "0.20260708.2";
-            arch = "linux-x64";
-            hash = "sha256-1ZeBTtzUPfF5GwWY+clgQRoSvCAIj5jfPVn9Y/7PtfM=";
-          }
-        ];
-
-      # Same layout as vscode-with-extensions: unversioned dirs + extensions.json.
-      extensionJsonFile = pkgs.writeTextFile {
-        name = "cursor-extensions-json";
-        destination = "/share/vscode/extensions/extensions.json";
-        text = unstable.vscode-utils.toExtensionJson vscodeExtensions;
-      };
-
-      extensionsEnv = pkgs.buildEnv {
-        name = "cursor-extensions";
-        paths = vscodeExtensions ++ [ extensionJsonFile ];
-      };
-
-      # Combined dir: Nix extensions + any marketplace extras still under
-      # ~/.cursor/extensions. Avoids .obsolete on Nix links.
-      cursorBin = pkgs.writeShellApplication {
+      cursorBin = mkEditorWrapper {
+        inherit pkgs lib;
+        inherit (unstable) vscode-extensions vscode-utils;
         name = "cursor";
-        runtimeInputs = [
-          pkgs.coreutils
-          pkgs.jq
-          pkgs.findutils
-        ];
-        text = ''
-          # Store-path shell: Cursor agent sandbox hides /run/current-system.
+        exe = lib.getExe unstable.code-cursor;
+        processPattern = "/lib/cursor/cursor";
+        # Store-path shell: Cursor agent sandbox hides /run/current-system.
+        preamble = ''
           export SHELL="${pkgs.bashInteractive}/bin/bash"
-
-          user_exts="$HOME/.cursor/extensions"
-          nix_exts="${extensionsEnv}/share/vscode/extensions"
-          ext_dir="$HOME/.local/share/cursor-extensions"
-
-          mkdir -p "$user_exts" "$ext_dir"
-
-          rm -f "$ext_dir/.obsolete" "$user_exts/.obsolete"
-
-          # Rebuilding while the editor runs makes it drop extensions (theme
-          # resets), and CLI calls like `--install-extension` (Claude Code does
-          # this on start) go through this wrapper too. Only rebuild when the
-          # Nix set or user sideloads changed.
-          stamp="$nix_exts $(find "$user_exts" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | tr '\n' ' ')"
-          if [ "$(cat "$ext_dir/.nix-stamp" 2>/dev/null || true)" = "$stamp" ]; then
-            exec ${lib.getExe unstable.code-cursor} --extensions-dir "$ext_dir" "$@"
-          fi
-
-          # Drop previous links; keep real dirs installed via --install-extension.
-          find "$ext_dir" -mindepth 1 -maxdepth 1 -type l -exec rm -f {} +
-
-          if [ -d "$nix_exts" ]; then
-            for path in "$nix_exts"/*; do
-              [ -e "$path" ] || continue
-              name=$(basename "$path")
-              [ "$name" = "extensions.json" ] && continue
-              ln -sfn "$(readlink -f "$path")" "$ext_dir/$name"
-            done
-          fi
-
-          # Real user dirs only (remote-ssh, …). Skip stale
-          # Nix symlinks left in ~/.cursor/extensions from older wrappers.
-          if [ -d "$user_exts" ]; then
-            for path in "$user_exts"/*; do
-              [ -e "$path" ] || continue
-              [ -L "$path" ] && continue
-              [ -d "$path" ] || continue
-              name=$(basename "$path")
-              ln -sfn "$path" "$ext_dir/$name"
-            done
-          fi
-
-          # Register Nix extensions; rewrite locations to the combined dir.
-          if [ -f "$nix_exts/extensions.json" ]; then
-            jq --arg d "$ext_dir" '
-              map(
-                .location.fsPath = ($d + "/" + .relativeLocation)
-                | .location.path = .location.fsPath
-              )
-            ' "$nix_exts/extensions.json" >"$ext_dir/extensions.json.new"
-          else
-            echo '[]' >"$ext_dir/extensions.json.new"
-          fi
-
-          # Append surviving user extensions not already listed.
-          for path in "$ext_dir"/*; do
-            [ -d "$path" ] || continue
-            name=$(basename "$path")
-            [ "$name" = "extensions.json" ] && continue
-            id=$(jq -r '((.publisher // "") + "." + (.name // "")) | ascii_downcase' "$path/package.json" 2>/dev/null || true)
-            ver=$(jq -r '.version // "0.0.0"' "$path/package.json" 2>/dev/null || echo "0.0.0")
-            [ -n "$id" ] && [ "$id" != "null.null" ] || continue
-            if jq -e --arg id "$id" 'any(.identifier.id == $id)' "$ext_dir/extensions.json.new" >/dev/null; then
-              continue
-            fi
-            jq --arg id "$id" --arg ver "$ver" --arg path "$path" --arg rel "$name" '
-              . + [{
-                identifier: { id: $id, uuid: "" },
-                version: $ver,
-                location: { "$mid": 1, fsPath: $path, path: $path, scheme: "file" },
-                relativeLocation: $rel,
-                metadata: {
-                  id: "",
-                  installedTimestamp: 0,
-                  isApplicationScoped: false,
-                  isPreReleaseVersion: false,
-                  publisherDisplayName: ($id | split(".")[0]),
-                  publisherId: "",
-                  targetPlatform: "undefined",
-                  updated: false
-                }
-              }]
-            ' "$ext_dir/extensions.json.new" >"$ext_dir/extensions.json.tmp"
-            mv -f "$ext_dir/extensions.json.tmp" "$ext_dir/extensions.json.new"
-          done
-          mv -f "$ext_dir/extensions.json.new" "$ext_dir/extensions.json"
-          printf '%s' "$stamp" >"$ext_dir/.nix-stamp"
-
-          exec ${lib.getExe unstable.code-cursor} --extensions-dir "$ext_dir" "$@"
         '';
+        userExtensionsDir = ".cursor/extensions";
+        extensionsDir = ".local/share/cursor-extensions";
+        userDataDir = ".config/Cursor";
+        dotsPath = dots;
       };
 
       # lndir does not overwrite: put our bin first so it wins over code-cursor's.

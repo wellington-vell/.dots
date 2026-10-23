@@ -58,4 +58,7 @@
   "diffEditor.ignoreTrimWhitespace": false,
   "git.ignoreRebaseWarning": true,
   "workbench.colorTheme": "Bearded Theme Arc",
+  // Nix pins extension versions; marketplace updates leave duplicate copies.
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
 }

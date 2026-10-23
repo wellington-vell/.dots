@@ -65,4 +65,7 @@
     "editor.defaultFormatter": "vscode.json-language-features",
   },
   "workbench.colorTheme": "Bearded Theme Arc",
+  // Nix pins extension versions; marketplace updates leave duplicate copies.
+  "extensions.autoUpdate": "off",
+  "extensions.autoCheckUpdates": false,
 }

@@ -181,6 +181,22 @@
         "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1792502884,
+        "narHash": "sha256-IoNisKcGbUjdd45qCqywGMCYmZ5EnkxezvLII0FWwNA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "02c087f3fe673c9e317f206a627cb6b910336dbe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "noctalia": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -223,14 +239,35 @@
         ]
       },
       "locked": {
-        "lastModified": 1792689006,
-        "narHash": "sha256-6g1i1dJHhabp1OxoWvSGRaAmy0hFE7aiiSzHbLVcIZ4=",
+        "lastModified": 1792760506,
+        "narHash": "sha256-OKQTCjPjRqfLZMJIHd9VLnZO+kV2Y/HWNiOvsGpWS2U=",
         "owner": "wellington-vell",
         "repo": "phonebridge",
-        "rev": "feaa77c608c52456c495a03d42cee6d8322154d4",
+        "rev": "27db442549801459541b6f87112163937143c22c",
         "type": "github"
       },
       "original": {
+        "owner": "wellington-vell",
+        "repo": "phonebridge",
+        "type": "github"
+      }
+    },
+    "phonebridge-app": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3",
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "dir": "app",
+        "lastModified": 1792760506,
+        "narHash": "sha256-OKQTCjPjRqfLZMJIHd9VLnZO+kV2Y/HWNiOvsGpWS2U=",
+        "owner": "wellington-vell",
+        "repo": "phonebridge",
+        "rev": "27db442549801459541b6f87112163937143c22c",
+        "type": "github"
+      },
+      "original": {
+        "dir": "app",
         "owner": "wellington-vell",
         "repo": "phonebridge",
         "type": "github"
@@ -247,7 +284,29 @@
         "noctalia": "noctalia",
         "noctalia-plugins": "noctalia-plugins",
         "phonebridge": "phonebridge",
+        "phonebridge-app": "phonebridge-app",
         "zen-browser": "zen-browser"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "phonebridge-app",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792653800,
+        "narHash": "sha256-E8zFJilWlORqzIUJizyhZ/0WKBOizuM6s1nRSgPRomo=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "5f267b7f323a4d6df0b9c0e3eaa043cbe85386f2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "zen-browser": {

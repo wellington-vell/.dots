@@ -33,6 +33,7 @@
       claude-desktop
       playwright
       phonebridge
+      android
     ];
   };
 }
