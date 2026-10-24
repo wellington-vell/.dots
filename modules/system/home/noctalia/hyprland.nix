@@ -31,6 +31,7 @@
 
       hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle clipboard"))
       hl.bind(mainMod .. " + Space",  hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle launcher"))
+      hl.bind(mainMod .. " + K",      hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle wellington-vell/keybinds:panel"))
       hl.bind(mainMod .. " + CTRL + O", hl.dsp.exec_cmd(noctaliaIpc .. "panel-toggle control-center"))
       hl.bind(mainMod .. " + comma", function()
         local current = hl.get_config("general.layout") or "dwindle"

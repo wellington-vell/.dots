@@ -1,0 +1,25 @@
+# Keybinds cheat sheet: a floating panel listing Hyprland, terminal/tmux and
+# LazyVim/git shortcuts from keybinds.json. Click a row to expand its details.
+# Open it with: noctalia msg panel-toggle wellington-vell/keybinds:panel (SUPER+K)
+
+id = "wellington-vell/keybinds"
+name = "Keybinds"
+version = "1.0.0"
+plugin_api = 30
+author = "wellington-vell"
+license = "MIT"
+dependencies = []
+tags = ["help", "keyboard"]
+icon = "keyboard"
+description = "Expandable cheat sheet of desktop, terminal and editor shortcuts."
+
+[[panel]]
+id = "panel"
+entry = "panel.luau"
+width = 600
+height = 680
+placement = "floating"
+position = "center"
+# hjkl navigation (onKey in panel.luau) needs keyboard focus while open.
+keyboard_focus = "exclusive"
+capture_keys = ["h", "j", "k", "l", "g", "q"]

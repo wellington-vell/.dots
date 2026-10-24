@@ -61,4 +61,5 @@
   // Nix pins extension versions; marketplace updates leave duplicate copies.
   "extensions.autoUpdate": false,
   "extensions.autoCheckUpdates": false,
+  "git.openRepositoryInParentFolders": "always",
 }

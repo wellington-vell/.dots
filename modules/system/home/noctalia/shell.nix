@@ -83,9 +83,14 @@
 
       phonebridgePkg = inputs.phonebridge.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
-      # Official screen_recorder under its own id, patched with a "pick" video source
-      # (hover-highlight a screen with slurp, click to record it) and bar tooltips.
+      # Local plugins: the official screen_recorder under its own id, patched with a
+      # "pick" video source (hover-highlight a screen with slurp, click to record it)
+      # and bar tooltips; plus the SUPER+K keybinds cheat sheet (./plugins/keybinds).
       patchedPlugins = pkgs.linkFarm "noctalia-patched-plugins" [
+        {
+          name = "keybinds";
+          path = ./plugins/keybinds;
+        }
         {
           name = "screen_recorder";
           path = pkgs.applyPatches {
@@ -216,6 +221,7 @@
         plugins.enabled = [
           "wellington-vell/screen_recorder"
           "wellington-vell/phonebridge"
+          "wellington-vell/keybinds"
         ];
         # Declaring sources replaces Noctalia's defaults, so keep official +
         # community listed. The Phonebridge bar toggle ships inside its package.

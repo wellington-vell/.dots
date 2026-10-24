@@ -8,6 +8,7 @@
 
       # Tools
       c = "opencode";
+      cc = "claude";
       d = "docker";
       g = "git";
       t = "tmux attach || tmux new -s Work";
