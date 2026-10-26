@@ -239,11 +239,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792760506,
-        "narHash": "sha256-OKQTCjPjRqfLZMJIHd9VLnZO+kV2Y/HWNiOvsGpWS2U=",
+        "lastModified": 1793033088,
+        "narHash": "sha256-OV2zGlW71S4OxVUoFM5mYHmozP7tX5h1iZj2iF/SwvA=",
         "owner": "wellington-vell",
         "repo": "phonebridge",
-        "rev": "27db442549801459541b6f87112163937143c22c",
+        "rev": "ffc82da7cfa4d0a6996b054fc4d2b0f6ad79aad0",
         "type": "github"
       },
       "original": {
@@ -259,11 +259,11 @@
       },
       "locked": {
         "dir": "app",
-        "lastModified": 1792760506,
-        "narHash": "sha256-OKQTCjPjRqfLZMJIHd9VLnZO+kV2Y/HWNiOvsGpWS2U=",
+        "lastModified": 1793033088,
+        "narHash": "sha256-OV2zGlW71S4OxVUoFM5mYHmozP7tX5h1iZj2iF/SwvA=",
         "owner": "wellington-vell",
         "repo": "phonebridge",
-        "rev": "27db442549801459541b6f87112163937143c22c",
+        "rev": "ffc82da7cfa4d0a6996b054fc4d2b0f6ad79aad0",
         "type": "github"
       },
       "original": {
