@@ -25,6 +25,10 @@
                   Value = true;
                   Status = "default";
                 };
+                int = v: {
+                  Value = v;
+                  Status = "default";
+                };
               in
               {
                 "gfx.webrender.all" = on;
@@ -32,16 +36,22 @@
                 "media.ffmpeg.vaapi.enabled" = on;
                 "media.hardware-video-decoding.force-enabled" = on;
                 "media.rdd-ffmpeg.enabled" = on;
+                # Session state is ~1.3MB compressed and serialized on the main
+                # thread; the default 15s interval shows up as periodic hitches.
+                "browser.sessionstore.interval" = int 60000;
+                # Unload background tabs when the system runs low on memory
+                # instead of letting long-lived tabs push everything into swap.
+                "browser.tabs.unloadOnLowMemory" = on;
               };
             ExtensionSettings = {
               "uBlock0@raymondhill.net" = {
                 install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
                 installation_mode = "force_installed";
               };
-              "enhancerforyoutube@maximerf.addons.mozilla.org" = {
-                install_url = "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi";
-                installation_mode = "force_installed";
-              };
+              # "enhancerforyoutube@maximerf.addons.mozilla.org" = {
+              #   install_url = "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi";
+              #   installation_mode = "force_installed";
+              # };
             };
           };
         })

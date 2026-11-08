@@ -182,7 +182,7 @@
           ln -sfn ${lazyLua} "$lua_dir/config/lazy.lua"
           ln -sfn ${lspLua} "$lua_dir/plugins/lsp.lua"
           ln -sfn ${noiceLua} "$lua_dir/plugins/noice.lua"
-          rm -f "$lua_dir/plugins/base16.lua" "$lua_dir/matugen.lua"
+          rm -f "$lua_dir/plugins/base16.lua" "$lua_dir/plugins/icons.lua" "$lua_dir/matugen.lua"
           chown -R --reference="$home" "$home/.config/nvim" 2>/dev/null || true
         done
       '';

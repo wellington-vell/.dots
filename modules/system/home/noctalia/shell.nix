@@ -252,8 +252,10 @@
           }
         ];
         # Screen glyphs so the recorder doesn't share "video" with the Phonebridge camera.
+        # AAC audio: the default Opus-in-MP4 is rejected by WhatsApp and some players.
         plugin_settings."wellington-vell/screen_recorder" = {
           video_source = "pick";
+          audio_codec = "aac";
           glyph_unavailable = "screen-share-off";
           glyph_idle = "screen-share";
           glyph_pending = "screen-share";

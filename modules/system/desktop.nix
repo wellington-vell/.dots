@@ -19,7 +19,6 @@
       chromium
       zen
       obsidian
-      discord
       gaming
       syncplay
       qbittorrent
