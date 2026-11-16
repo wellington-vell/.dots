@@ -101,9 +101,6 @@
         }
       ];
 
-      # Default browser for Zen soft-relaunch (host.apps.browser).
-      defaultBrowser = config.host.apps.browser;
-
       # After templates rewrite theme files, nudge running apps to pick them up.
       # Keep this fast: no full hyprctl reload, no duplicate Ghostty reload.
       noctaliaOnColorsChanged = pkgs.writeShellApplication {
@@ -135,16 +132,7 @@
           # LazyVim / neovim: community apply.sh also signals; nudge again after writes.
           pkill -SIGUSR1 -x nvim >/dev/null 2>&1 || true
 
-          # Zen: no CSS hot-reload — soft-relaunch running instances (session restore).
           # Ghostty reload is handled by the builtin ghostty apply.sh; do not duplicate.
-          browser=${lib.escapeShellArg defaultBrowser}
-          if pgrep -x zen-beta >/dev/null 2>&1 || pgrep -x zen >/dev/null 2>&1; then
-            (
-              pkill -x zen-beta >/dev/null 2>&1 || pkill -x zen >/dev/null 2>&1 || true
-              sleep 0.4
-              command -v "$browser" >/dev/null 2>&1 && exec "$browser"
-            ) >/dev/null 2>&1 &
-          fi
         '';
       };
 
@@ -201,7 +189,6 @@
           community_ids = [
             "opencode"
             "neovim"
-            "zen-browser"
             "obsidian"
             "steam"
             "fzf"
@@ -209,8 +196,8 @@
           ];
         };
 
-        # Builtin ghostty apply.sh reloads the terminal; hyprland/neovim/zen
-        # need the colors_changed hook below for live / soft-relaunch updates.
+        # Builtin ghostty apply.sh reloads the terminal; hyprland/neovim
+        # need the colors_changed hook below for live updates.
         # Stable /etc path so rebuilds update the script without a Noctalia restart
         # (store-absolute paths stay frozen in the long-lived daemon env).
         hooks.colors_changed = [ "/etc/noctalia/on-colors-changed" ];

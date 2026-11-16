@@ -82,7 +82,7 @@
           };
           browser = lib.mkOption {
             type = lib.types.str;
-            default = "zen-beta";
+            default = "firefox";
             description = "Default browser for Hyprland binds.";
           };
           menu = lib.mkOption {

@@ -57,27 +57,6 @@
         "type": "github"
       }
     },
-    "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "zen-browser",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792098797,
-        "narHash": "sha256-u4DIIZgznEGzByxXrxWCXK19VcMtTBmi/M9gZ7Jk9bM=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "640725978b99076e18e069f6e7d2959124584f8f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
     "identity": {
       "flake": false,
       "locked": {
@@ -239,11 +218,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793327305,
-        "narHash": "sha256-D68AlKy0skN0HJ0LS9SnjdlxYcrOWEMQjmVNox0B02E=",
+        "lastModified": 1794441895,
+        "narHash": "sha256-ClpUi1HhrSao4s+Tm/Me7YwBT7KG+Q+YU+oA80fx8Hw=",
         "owner": "wellington-vell",
         "repo": "phonebridge",
-        "rev": "0eab3ac3762c2415cfef5a0db6623433981646d2",
+        "rev": "96fe57606ecd02b3f01e5bddb7dd974c8ecd9578",
         "type": "github"
       },
       "original": {
@@ -284,8 +263,7 @@
         "noctalia": "noctalia",
         "noctalia-plugins": "noctalia-plugins",
         "phonebridge": "phonebridge",
-        "phonebridge-app": "phonebridge-app",
-        "zen-browser": "zen-browser"
+        "phonebridge-app": "phonebridge-app"
       }
     },
     "rust-overlay": {
@@ -306,27 +284,6 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "type": "github"
-      }
-    },
-    "zen-browser": {
-      "inputs": {
-        "home-manager": "home-manager",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792522695,
-        "narHash": "sha256-jTLo+OAKTDjIOEv2YA8xKTkqp1zZ+ZwXjztgXj6E7bk=",
-        "owner": "0xc000022070",
-        "repo": "zen-browser-flake",
-        "rev": "bb286c34998a498df925c7a7b4d69aea8c44931c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "0xc000022070",
-        "repo": "zen-browser-flake",
         "type": "github"
       }
     }

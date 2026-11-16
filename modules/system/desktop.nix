@@ -17,7 +17,7 @@
       tmux
       # Apps / tools (modules/features/)
       chromium
-      zen
+      firefox
       obsidian
       gaming
       syncplay
