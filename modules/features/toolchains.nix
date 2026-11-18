@@ -6,8 +6,14 @@
   flake.modules.nixos.toolchains =
     { pkgs, ... }:
     let
-      unstable = import inputs.nixpkgs-unstable {
-        inherit (pkgs.stdenv.hostPlatform) system;
+      rust = pkgs.rust-bin.stable."1.100.0".default.override {
+        extensions = [
+          "cargo"
+          "clippy"
+          "rust-analyzer"
+          "rust-src"
+          "rustfmt"
+        ];
       };
       bun' = pkgs.bun.overrideAttrs (
         old:
@@ -40,13 +46,13 @@
       );
     in
     {
+      nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
+
       environment.systemPackages = with pkgs; [
         nodejs
         bun'
         go
-        unstable.rustc
-        unstable.cargo
-        unstable.clippy
+        rust
         python3
         uv
         just
