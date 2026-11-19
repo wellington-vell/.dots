@@ -22,6 +22,8 @@
         set -g extended-keys-format csi-u
         set -ag terminal-features "xterm-kitty:extkeys"
         set -as terminal-features ",*:clipboard"
+        # Forward OSC 8 hyperlinks
+        set -as terminal-features ",*:hyperlinks"
       '';
     };
   };

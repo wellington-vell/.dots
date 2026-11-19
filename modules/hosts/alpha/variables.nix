@@ -14,15 +14,15 @@
           1
           2
           3
+          4
         ];
       }
       {
         output = "DVI-D-2";
         mode = "1366x768";
         position = "1920x0";
-        defaultWorkspace = 4;
+        defaultWorkspace = 5;
         workspaces = [
-          4
           5
           6
           7
