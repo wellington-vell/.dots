@@ -27,6 +27,7 @@
       cursor
       lazydocker
       vlc
+      libreoffice
       toolchains
       agents
       claude-desktop
