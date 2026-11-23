@@ -326,6 +326,16 @@
             --run 'export STARSHIP_CONFIG="''${STARSHIP_CONFIG:-$HOME/.config/starship.toml}"'
         '';
       };
+
+      # Activation runs while a changed NetworkManager is stopped; Noctalia
+      # started then shows no networks, so wait (bounded) for it to return.
+      noctaliaRelaunch = pkgs.writeShellScript "noctalia-relaunch" ''
+        for _ in $(${pkgs.coreutils}/bin/seq 60); do
+          ${pkgs.systemd}/bin/busctl --system status org.freedesktop.NetworkManager >/dev/null 2>&1 && break
+          ${pkgs.coreutils}/bin/sleep 0.5
+        done
+        exec ${noctaliaWrapped}/bin/noctalia
+      '';
     in
     {
       imports = [ inputs.noctalia.nixosModules.default ];
@@ -432,7 +442,7 @@
             # shellcheck disable=SC2086
             runuser -u "$user" -- env $sessionEnv \
               ${config.programs.hyprland.package}/bin/hyprctl dispatch \
-              'hl.dsp.exec_cmd("${noctaliaWrapped}/bin/noctalia")' >/dev/null 2>&1 || true
+              'hl.dsp.exec_cmd("${noctaliaRelaunch}")' >/dev/null 2>&1 || true
           fi
           echo "$want" >"$stamp"
         fi

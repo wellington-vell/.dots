@@ -11,6 +11,7 @@
         # video/render: DRM device access for gpu-screen-recorder monitor enum.
         extraGroups = [
           "wheel"
+          "networkmanager"
           "video"
           "render"
         ];

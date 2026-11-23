@@ -1,15 +1,11 @@
 {
-  # Internal Seagate 1TB NTFS volume labeled "HD".
+  # Internal Seagate 1TB data volume, ext4, labeled "hd".
   flake.modules.nixos.alpha = {
     fileSystems."/mnt/hd" = {
-      device = "/dev/disk/by-uuid/18CE48A2CE4879D0";
-      fsType = "ntfs3";
+      device = "/dev/disk/by-label/hd";
+      fsType = "ext4";
       options = [
-        "rw"
-        "uid=1000"
-        "gid=100"
-        "umask=022"
-        "force"
+        "defaults"
         "nofail"
         "x-gvfs-show"
         "x-gvfs-name=HD"

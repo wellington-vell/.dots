@@ -14,6 +14,7 @@
       base
       desktop
       nvidia
+      bcm43569-usb3
       noctalia
       alpha
     ];
