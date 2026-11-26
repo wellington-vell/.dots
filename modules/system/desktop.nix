@@ -13,6 +13,7 @@
       fonts
       pointer
       filemanager
+      opensnitch
       terminal
       tmux
       # Apps / tools (modules/features/)
